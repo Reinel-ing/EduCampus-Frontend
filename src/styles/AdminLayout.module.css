@@ -1,0 +1,46 @@
+.adminLayout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f3f4f6;
+}
+
+.mainContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: auto;
+  height: 100vh;
+}
+
+.mainContainer {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+  max-height: 100vh;
+}
+
+.contentWrapper {
+  background-color: #ffffff;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  overflow-y: auto;
+  max-height: calc(100vh - 8rem);
+}
+
+@media (max-width: 768px) {
+  .mainContent {
+    margin-left: 0 !important;
+    padding-top: 4rem;
+  }
+
+  .contentWrapper {
+    margin-bottom: 60px;
+    padding-bottom: 3rem;
+  }
+
+  .mainContainer {
+    padding-bottom: 4rem;
+  }
+}

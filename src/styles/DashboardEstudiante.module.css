@@ -1,0 +1,159 @@
+/* Dashboard Container */
+.dashboard {
+  padding: 0;
+}
+
+/* Welcome Section */
+.welcomeSection {
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.welcomeTitle {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 8px 0;
+}
+
+.welcomeSubtitle {
+  font-size: 16px;
+  color: #64748b;
+  margin: 0;
+}
+
+/* Loading State */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 16px;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #e2e8f0;
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Error State */
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 16px;
+}
+
+.errorMessage {
+  color: #dc2626;
+  font-size: 16px;
+}
+
+.errorContainer button {
+  padding: 10px 20px;
+  background-color: #667eea;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* Upcoming Classes Section */
+.upcomingClasses {
+  margin-top: 40px;
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.sectionTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 20px 0;
+}
+
+/* Class List */
+.classList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.classItem {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+}
+
+.classTime {
+  background: #667eea;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  min-width: 90px;
+  text-align: center;
+}
+
+.classInfo {
+  flex: 1;
+}
+
+.className {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 4px;
+}
+
+.classDay {
+  font-size: 14px;
+  color: #64748b;
+}
+
+/* No Classes State */
+.noClasses {
+  text-align: center;
+  color: #64748b;
+  font-size: 16px;
+  padding: 40px 20px;
+  font-style: italic;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .welcomeTitle {
+    font-size: 24px;
+  }
+
+  .classItem {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .classTime {
+    width: 100%;
+  }
+}

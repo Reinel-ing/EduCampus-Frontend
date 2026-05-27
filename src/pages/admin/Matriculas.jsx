@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 import { listarInscripciones } from "../../services/inscripcionService";
 import { listarCursos } from "../../services/cursoService";
 import { listarEstudiantes } from "../../services/estudianteService";
@@ -50,29 +50,34 @@ const Matriculas = () => {
 
   if (loading) return (
     <div style={{ display: "flex", justifyContent: "center", padding: "4rem" }}>
-      <div style={{ width: 48, height: 48, border: "4px solid #e2e8f0", borderTopColor: "#667eea", borderRadius: "50%", animation: "spin 1s linear infinite" }}></div>
+      <div style={{ width: 48, height: 48, border: "4px solid #e2e8f0", borderTopColor: "#1e40af", borderRadius: "50%", animation: "spin 1s linear infinite" }}></div>
     </div>
   );
 
   return (
-    <div style={{ padding: "1.5rem" }}>
-      <div style={{ marginBottom: "1.5rem" }}>
-        <h1 style={{ fontSize: "1.75rem", fontWeight: 700, color: "#1e293b", margin: 0 }}>📋 Matrículas</h1>
-        <p style={{ color: "#64748b", margin: "0.25rem 0 0" }}>Listado de estudiantes inscritos por curso</p>
+    <div style={{ padding: "22px 24px", background: "#f0f4f8", minHeight: "100%", boxSizing: "border-box" }}>
+      {/* Banner institucional */}
+      <div style={{ background: "linear-gradient(135deg,#0f2744 0%,#1e40af 100%)", borderRadius: "12px", padding: "18px 24px", marginBottom: "16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div>
+          <div style={{ fontSize: "17px", fontWeight: 800, color: "#fff", marginBottom: "3px" }}>Matrículas</div>
+          <div style={{ fontSize: "12.5px", color: "rgba(255,255,255,.6)" }}>{inscripciones.length} {inscripciones.length === 1 ? "inscripción registrada" : "inscripciones registradas"}</div>
+        </div>
+        <div style={{ fontSize: "36px", opacity: 0.7 }}>📋</div>
       </div>
+      <div>
 
       {/* Stats */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "1rem", marginBottom: "1.5rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "12px", marginBottom: "14px" }}>
         {[
-          { label: "Total Matrículas", value: inscripciones.length, icon: "📋" },
-          { label: "Cursos", value: cursos.length, icon: "📚" },
-          { label: "Estudiantes", value: estudiantes.length, icon: "👥" },
+          { label: "Total Matrículas", value: inscripciones.length, icon: "📋", color: "#1e40af", bg: "#eff6ff" },
+          { label: "Cursos", value: cursos.length, icon: "📚", color: "#15803d", bg: "#f0fdf4" },
+          { label: "Estudiantes", value: estudiantes.length, icon: "👥", color: "#d97706", bg: "#fffbeb" },
         ].map((s, i) => (
-          <div key={i} style={{ background: "white", borderRadius: 12, padding: "1.25rem", boxShadow: "0 2px 8px rgba(0,0,0,0.08)", border: "1px solid #e2e8f0", display: "flex", alignItems: "center", gap: "1rem" }}>
-            <span style={{ fontSize: "2rem" }}>{s.icon}</span>
+          <div key={i} style={{ background: "white", borderRadius: "10px", padding: "15px 17px", border: "1px solid #dde3ec", borderLeft: `4px solid ${s.color}`, display: "flex", alignItems: "center", gap: "12px" }}>
+            <div style={{ width: "42px", height: "42px", borderRadius: "9px", background: s.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "18px", flexShrink: 0 }}>{s.icon}</div>
             <div>
-              <p style={{ margin: 0, fontSize: "0.75rem", color: "#64748b", textTransform: "uppercase", fontWeight: 600 }}>{s.label}</p>
-              <p style={{ margin: 0, fontSize: "1.75rem", fontWeight: 700, color: "#667eea" }}>{s.value}</p>
+              <div style={{ fontSize: "24px", fontWeight: 800, color: "#0f2744", lineHeight: 1 }}>{s.value}</div>
+              <div style={{ fontSize: "11px", color: "#6b7280", marginTop: "3px" }}>{s.label}</div>
             </div>
           </div>
         ))}
@@ -93,7 +98,7 @@ const Matriculas = () => {
       <div style={{ background: "white", borderRadius: 12, overflow: "hidden", boxShadow: "0 2px 8px rgba(0,0,0,0.08)", border: "1px solid #e2e8f0" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
-            <tr style={{ background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" }}>
+            <tr style={{ background: "linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%)" }}>
               {["#", "Estudiante", "Curso", "ID Inscripción"].map((h) => (
                 <th key={h} style={{ padding: "1rem 1.5rem", textAlign: "left", color: "white", fontWeight: 700, fontSize: "0.8rem", textTransform: "uppercase" }}>{h}</th>
               ))}
@@ -114,6 +119,7 @@ const Matriculas = () => {
             )}
           </tbody>
         </table>
+      </div>
       </div>
     </div>
   );

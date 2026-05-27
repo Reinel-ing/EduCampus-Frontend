@@ -162,17 +162,25 @@ const MaterialDidactico = () => {
 
   if (loading) {
     return (
-      <div className={styles.loading}>
-        <div className={styles.spinner}></div>
-        <p>Cargando material didáctico...</p>
+      <div style={{ display:"flex", justifyContent:"center", alignItems:"center", height:"400px" }}>
+        <div style={{ width:40, height:40, border:"4px solid #e2e8f0", borderTopColor:"#1e40af", borderRadius:"50%", animation:"spin 1s linear infinite" }} />
       </div>
     );
   }
 
   return (
+    <div style={{ padding:"22px 24px", background:"#f0f4f8", minHeight:"100%", boxSizing:"border-box" }}>
+      {/* Banner institucional */}
+      <div style={{ background:"linear-gradient(135deg,#0f2744 0%,#1e40af 100%)", borderRadius:"12px", padding:"18px 24px", marginBottom:"16px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+        <div>
+          <div style={{ fontSize:"17px", fontWeight:800, color:"#fff", marginBottom:"3px" }}>Material Didáctico</div>
+          <div style={{ fontSize:"12.5px", color:"rgba(255,255,255,.6)" }}>{materiales.length} {materiales.length === 1 ? "archivo disponible" : "archivos disponibles"}</div>
+        </div>
+        <div style={{ fontSize:"36px", opacity:0.7 }}>📁</div>
+      </div>
     <div className={styles.container}>
       {/* Header */}
-      <div className={styles.header}>
+      <div className={styles.header} style={{ display:"none" }}>
         <h1 className={styles.title}>Material Didáctico</h1>
         <p className={styles.subtitle}>
           Gestiona y comparte recursos educativos con tus estudiantes
@@ -339,6 +347,7 @@ const MaterialDidactico = () => {
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 };

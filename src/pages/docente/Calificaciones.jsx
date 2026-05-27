@@ -92,9 +92,9 @@ const Calificaciones = () => {
 
     const p1 = parcial1 ? Number(parcial1.nota) * 0.3 : 0;
     const p2 = parcial2 ? Number(parcial2.nota) * 0.3 : 0;
-    const f = final ? Number(final.nota) * 0.4 : 0;
+    const f  = final    ? Number(final.nota)    * 0.4 : 0;
 
-    return ((p1 + p2 + f) * 20).toFixed(1); // Convertir de 0-5 a 0-100
+    return (p1 + p2 + f).toFixed(2); // escala 0-5
   };
 
   const obtenerProximaEvaluacion = (califs) => {
@@ -126,19 +126,16 @@ const Calificaciones = () => {
     e.preventDefault();
 
     const nota = parseFloat(formData.nota);
-    if (isNaN(nota) || nota < 0 || nota > 100) {
-      alert("La nota debe estar entre 0 y 100");
+    if (isNaN(nota) || nota < 0 || nota > 5) {
+      alert("La nota debe estar entre 0.0 y 5.0");
       return;
     }
-
-    // Convertir nota de 0-100 a 0-5
-    const notaConvertida = nota / 20;
 
     const datos = {
       id_estudiante: estudianteSeleccionado.id_estudiante,
       id_curso: parseInt(cursoSeleccionado),
       tipo_evaluacion: formData.tipo_evaluacion,
-      nota: notaConvertida,
+      nota: nota,
     };
 
     const resultado = await crearCalificacion(datos);
@@ -154,16 +151,15 @@ const Calificaciones = () => {
 
   const handleEditarCalificacion = async (calificacion, nuevaNota) => {
     const nota = parseFloat(nuevaNota);
-    if (isNaN(nota) || nota < 0 || nota > 100) {
-      alert("La nota debe estar entre 0 y 100");
+    if (isNaN(nota) || nota < 0 || nota > 5) {
+      alert("La nota debe estar entre 0.0 y 5.0");
       return;
     }
 
-    const notaConvertida = nota / 20;
     const resultado = await actualizarCalificacion(
       calificacion.id_calificacion,
       {
-        nota: notaConvertida,
+        nota: nota,
       }
     );
 
@@ -190,17 +186,25 @@ const Calificaciones = () => {
 
   if (loading) {
     return (
-      <div className={styles.loading}>
-        <div className={styles.spinner}></div>
-        <p>Cargando...</p>
+      <div style={{ display:"flex", justifyContent:"center", alignItems:"center", height:"400px" }}>
+        <div style={{ width:40, height:40, border:"4px solid #e2e8f0", borderTopColor:"#1e40af", borderRadius:"50%", animation:"spin 1s linear infinite" }} />
       </div>
     );
   }
 
   return (
+    <div style={{ padding:"22px 24px", background:"#f0f4f8", minHeight:"100%", boxSizing:"border-box" }}>
+      {/* Banner institucional */}
+      <div style={{ background:"linear-gradient(135deg,#0f2744 0%,#1e40af 100%)", borderRadius:"12px", padding:"18px 24px", marginBottom:"16px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+        <div>
+          <div style={{ fontSize:"17px", fontWeight:800, color:"#fff", marginBottom:"3px" }}>Registro de Calificaciones</div>
+          <div style={{ fontSize:"12.5px", color:"rgba(255,255,255,.6)" }}>Gestiona las calificaciones de tus estudiantes</div>
+        </div>
+        <div style={{ fontSize:"36px", opacity:0.7 }}>📝</div>
+      </div>
     <div className={styles.container}>
       {/* Header */}
-      <div className={styles.header}>
+      <div className={styles.header} style={{ display:"none" }}>
         <h1 className={styles.title}>Registro de Calificaciones</h1>
         <p className={styles.subtitle}>
           Gestiona las calificaciones de tus estudiantes
@@ -285,17 +289,13 @@ const Calificaciones = () => {
                         {estudiante.nombres} {estudiante.apellidos}
                       </td>
                       <td className={styles.tableCell}>
-                        {parcial1
-                          ? (Number(parcial1.nota) * 20).toFixed(0)
-                          : "-"}
+                        {parcial1 ? Number(parcial1.nota).toFixed(1) : "-"}
                       </td>
                       <td className={styles.tableCell}>
-                        {parcial2
-                          ? (Number(parcial2.nota) * 20).toFixed(0)
-                          : "-"}
+                        {parcial2 ? Number(parcial2.nota).toFixed(1) : "-"}
                       </td>
                       <td className={styles.tableCell}>
-                        {final ? (Number(final.nota) * 20).toFixed(0) : "-"}
+                        {final ? Number(final.nota).toFixed(1) : "-"}
                       </td>
                       <td className={styles.tableCell}>
                         <span className={styles.promedioBadge}>{promedio}</span>
@@ -370,11 +370,11 @@ const Calificaciones = () => {
               </div>
 
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Nota (0-100):</label>
+                <label className={styles.formLabel}>Nota (0.0 - 5.0):</label>
                 <input
                   type="number"
                   min="0"
-                  max="100"
+                  max="5"
                   step="0.1"
                   value={formData.nota}
                   onChange={(e) =>
@@ -402,6 +402,7 @@ const Calificaciones = () => {
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 };

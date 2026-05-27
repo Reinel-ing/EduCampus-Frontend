@@ -155,24 +155,36 @@ const GestionCursos = () => {
 
   if (loading) {
     return (
-      <div className={styles.loading}>
-        <div className={styles.spinner}></div>
+      <div style={{ display:"flex", justifyContent:"center", alignItems:"center", height:"400px" }}>
+        <div style={{ width:40, height:40, border:"4px solid #e2e8f0", borderTopColor:"#1e40af", borderRadius:"50%", animation:"spin 1s linear infinite" }} />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className={styles.error}>
+      <div style={{ padding:"3rem", textAlign:"center", color:"#dc2626" }}>
         <p>Error: {error}</p>
+        <button onClick={cargarDatos} style={{ marginTop:"1rem", padding:"8px 20px", background:"#1e40af", color:"#fff", border:"none", borderRadius:"8px", cursor:"pointer", fontWeight:600 }}>
+          Reintentar
+        </button>
       </div>
     );
   }
 
   return (
+    <div style={{ padding:"22px 24px", background:"#f0f4f8", minHeight:"100%", boxSizing:"border-box" }}>
+      {/* Banner institucional */}
+      <div style={{ background:"linear-gradient(135deg,#0f2744 0%,#1e40af 100%)", borderRadius:"12px", padding:"18px 24px", marginBottom:"16px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+        <div>
+          <div style={{ fontSize:"17px", fontWeight:800, color:"#fff", marginBottom:"3px" }}>Gestión de Cursos</div>
+          <div style={{ fontSize:"12.5px", color:"rgba(255,255,255,.6)" }}>{cursos.length} {cursos.length === 1 ? "curso registrado" : "cursos registrados"}</div>
+        </div>
+        <div style={{ fontSize:"36px", opacity:0.7 }}>📚</div>
+      </div>
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1 className={styles.title}>📚 Gestión de Cursos</h1>
+        <h1 className={styles.title} style={{ display:"none" }}>📚 Gestión de Cursos</h1>
         <button className={styles.createButton} onClick={handleAgregar}>
           + Crear Curso
         </button>
@@ -222,6 +234,7 @@ const GestionCursos = () => {
           }}
         />
       )}
+    </div>
     </div>
   );
 };

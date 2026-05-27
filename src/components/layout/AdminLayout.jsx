@@ -8,7 +8,7 @@ const AdminLayout = () => {
   return (
     <div className={styles.adminLayout}>
       <Sidebar />
-      <div className={styles.mainContent} style={{ marginLeft: "256px" }}>
+      <div className={styles.mainContent} style={{ marginLeft: "240px" }}>
         <main className={styles.mainContainer}>
           <Header title="Panel de Administración" />
           <div className={styles.contentWrapper}>

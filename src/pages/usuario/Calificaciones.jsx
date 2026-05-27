@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { useAuth } from "../../context/AuthContext";
-import { obtenerCursosPorEstudiante } from "../../services/cursoService";
-import { obtenerCalificacionesPorEstudiante } from "../../services/calificacionService";
-import { obtenerAsistenciaPorEstudiante } from "../../services/asistenciaService";
-import jsPDF from "jspdf";
+import jsPDF     from "jspdf";
 import autoTable from "jspdf-autotable";
-import styles from "../../styles/CalificacionesEstudiante.module.css";
+
+import { useAuth }                            from "../../context/AuthContext";
+import { obtenerCursosPorEstudiante }         from "../../services/cursoService";
+import { obtenerCalificacionesPorEstudiante } from "../../services/calificacionService";
+import BannerPage  from "../../components/estudiante/BannerPage";
+import NotaResumen from "../../components/estudiante/NotaResumen";
 
 const Calificaciones = () => {
   const { usuario } = useAuth();
-  const [cursos, setCursos] = useState([]);
+  const [cursos,         setCursos]         = useState([]);
   const [calificaciones, setCalificaciones] = useState([]);
-  const [asistencias, setAsistencias] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading,        setLoading]        = useState(true);
 
   useEffect(() => {
     cargarDatos();
@@ -21,124 +21,81 @@ const Calificaciones = () => {
   const cargarDatos = async () => {
     try {
       setLoading(true);
-      const [cursosData, calificacionesData, asistenciasData] =
-        await Promise.all([
-          obtenerCursosPorEstudiante(usuario.id),
-          obtenerCalificacionesPorEstudiante(usuario.id),
-          obtenerAsistenciaPorEstudiante(usuario.id),
-        ]);
-
-      if (!cursosData.error) setCursos(cursosData);
-      if (!calificacionesData.error) setCalificaciones(calificacionesData);
-      if (!asistenciasData.error) setAsistencias(asistenciasData);
+      const [cursosData, califData] = await Promise.all([
+        obtenerCursosPorEstudiante(usuario.id),
+        obtenerCalificacionesPorEstudiante(usuario.id),
+      ]);
+      if (!cursosData.error)  setCursos(cursosData);
+      if (!califData.error)   setCalificaciones(califData);
     } catch (error) {
-      console.error("Error al cargar datos:", error);
+      console.error("[Calificaciones]", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const obtenerNotaPorTipo = (idCurso, tipo) => {
-    const calif = calificaciones.find(
+  // tipo_evaluacion: 1=Parcial 1, 2=Parcial 2, 3=Final
+  const getRawNota = (idCurso, tipo) => {
+    const entrada = calificaciones.find(
       (c) => c.id_curso === idCurso && c.tipo_evaluacion === tipo
     );
-    return calif ? (Number(calif.nota) * 20).toFixed(1) : "-";
+    return entrada ? Number(entrada.nota) : null;
   };
 
   const calcularPromedioCurso = (idCurso) => {
-    const parcial1 = calificaciones.find(
-      (c) => c.id_curso === idCurso && c.tipo_evaluacion === 1
-    );
-    const parcial2 = calificaciones.find(
-      (c) => c.id_curso === idCurso && c.tipo_evaluacion === 2
-    );
-    const final = calificaciones.find(
-      (c) => c.id_curso === idCurso && c.tipo_evaluacion === 3
-    );
-
-    if (!parcial1 || !parcial2 || !final) return "-";
-
-    const p1 = Number(parcial1.nota) * 20;
-    const p2 = Number(parcial2.nota) * 20;
-    const f = Number(final.nota) * 20;
-
-    return (p1 * 0.3 + p2 * 0.3 + f * 0.4).toFixed(1);
-  };
-
-  const obtenerEstadoCurso = (promedio) => {
-    if (promedio === "-") return "EN PROGRESO";
-    const nota = parseFloat(promedio);
-    return nota >= 70 ? "APROBADO" : "REPROBADO";
-  };
-
-  const calcularAsistenciaCurso = (idCurso) => {
-    const asistenciasCurso = asistencias.filter((a) => a.id_curso === idCurso);
-    if (asistenciasCurso.length === 0) return "0%";
-
-    const presentes = asistenciasCurso.filter((a) => a.estado === true).length;
-    const porcentaje = ((presentes / asistenciasCurso.length) * 100).toFixed(0);
-    return `${porcentaje}%`;
+    const p1  = getRawNota(idCurso, 1);
+    const p2  = getRawNota(idCurso, 2);
+    const fin = getRawNota(idCurso, 3);
+    if (p1 == null || p2 == null || fin == null) return null;
+    return (p1 * 0.3 + p2 * 0.3 + fin * 0.4).toFixed(2);
   };
 
   const calcularPromedioGeneral = () => {
     const promedios = cursos
-      .map((curso) => calcularPromedioCurso(curso.id_curso))
-      .filter((p) => p !== "-")
-      .map((p) => parseFloat(p));
-
+      .map((c) => calcularPromedioCurso(c.id_curso))
+      .filter(Boolean)
+      .map(Number);
     if (promedios.length === 0) return "0.0";
-    const suma = promedios.reduce((acc, curr) => acc + curr, 0);
-    return (suma / promedios.length).toFixed(1);
+    return (promedios.reduce((acc, p) => acc + p, 0) / promedios.length).toFixed(1);
   };
 
   const descargarBoletin = () => {
     const doc = new jsPDF();
 
-    // Título
     doc.setFontSize(18);
-    doc.text("Boletín de Calificaciones", 105, 15, { align: "center" });
+    doc.text("Boletin de Calificaciones", 105, 15, { align: "center" });
     doc.setFontSize(12);
     doc.text(`Estudiante: ${usuario.nombres} ${usuario.apellidos}`, 14, 25);
     doc.setFontSize(10);
     doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 14, 32);
 
-    // Preparar datos para la tabla
-    const headers = [
-      ["CURSO", "PARCIAL 1", "PARCIAL 2", "FINAL", "PROMEDIO", "ESTADO"],
-    ];
     const rows = cursos.map((curso) => {
+      const p1       = getRawNota(curso.id_curso, 1);
+      const p2       = getRawNota(curso.id_curso, 2);
+      const fin      = getRawNota(curso.id_curso, 3);
       const promedio = calcularPromedioCurso(curso.id_curso);
-      const estado = obtenerEstadoCurso(promedio);
+      const estado   = promedio == null
+        ? "EN PROGRESO"
+        : Number(promedio) >= 3.0 ? "APROBADO" : "REPROBADO";
       return [
         curso.nombre,
-        obtenerNotaPorTipo(curso.id_curso, 1),
-        obtenerNotaPorTipo(curso.id_curso, 2),
-        obtenerNotaPorTipo(curso.id_curso, 3),
-        promedio,
+        p1  != null ? p1.toFixed(1)  : "-",
+        p2  != null ? p2.toFixed(1)  : "-",
+        fin != null ? fin.toFixed(1) : "-",
+        promedio ?? "-",
         estado,
       ];
     });
 
-    // Generar tabla
     autoTable(doc, {
-      head: headers,
+      head: [["CURSO", "PARCIAL 1", "PARCIAL 2", "FINAL", "PROMEDIO", "ESTADO"]],
       body: rows,
       startY: 38,
       theme: "grid",
-      headStyles: {
-        fillColor: [102, 126, 234],
-        fontSize: 10,
-        fontStyle: "bold",
-      },
-      bodyStyles: {
-        fontSize: 9,
-      },
-      columnStyles: {
-        0: { cellWidth: 60 },
-        5: { halign: "center" },
-      },
+      headStyles: { fillColor: [30, 64, 175], fontSize: 10, fontStyle: "bold" },
+      bodyStyles: { fontSize: 9 },
+      columnStyles: { 0: { cellWidth: 60 }, 5: { halign: "center" } },
       didParseCell: (data) => {
-        // Colorear estados
         if (data.column.index === 5 && data.row.section === "body") {
           const estado = data.cell.raw;
           if (estado === "APROBADO") {
@@ -155,98 +112,93 @@ const Calificaciones = () => {
       },
     });
 
-    // Promedio general
     const finalY = (doc.lastAutoTable?.finalY || 158) + 10;
     doc.setFontSize(14);
     doc.setFont(undefined, "bold");
-    doc.text(
-      `Promedio General del Semestre: ${calcularPromedioGeneral()}`,
-      105,
-      finalY,
-      {
-        align: "center",
-      }
-    );
-
-    // Descargar
+    doc.text(`Promedio General: ${calcularPromedioGeneral()}`, 105, finalY, { align: "center" });
     doc.save(`Boletin_${usuario.nombres}_${usuario.apellidos}.pdf`);
   };
 
   if (loading) {
     return (
-      <div className={styles.loadingContainer}>
-        <div className={styles.spinner}></div>
-        <p>Cargando calificaciones...</p>
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "400px" }}>
+        <div style={{ width: 40, height: 40, border: "4px solid #e2e8f0", borderTopColor: "#1e40af", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
       </div>
     );
   }
 
+  const promedioGeneral = calcularPromedioGeneral();
+
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <h1 className={styles.title}>Mis Calificaciones</h1>
-        <button className={styles.btnDescargar} onClick={descargarBoletin}>
-          📄 Descargar Boletín Completo
-        </button>
-      </div>
+    <div style={{ padding: "22px 24px", background: "#f0f4f8", minHeight: "100%", boxSizing: "border-box" }}>
+
+      <BannerPage
+        icono="📝"
+        titulo="Mis Calificaciones"
+        subtitulo={
+          cursos.length > 0
+            ? `${cursos.length} curso${cursos.length !== 1 ? "s" : ""} registrado${cursos.length !== 1 ? "s" : ""}`
+            : "Sin calificaciones registradas"
+        }
+        extra={
+          cursos.length > 0 ? (
+            <button
+              onClick={descargarBoletin}
+              style={{
+                padding:    "9px 18px",
+                background: "rgba(255,255,255,0.15)",
+                border:     "1px solid rgba(255,255,255,0.3)",
+                borderRadius: "8px",
+                color:      "#fff",
+                fontWeight: 700,
+                fontSize:   "12.5px",
+                cursor:     "pointer",
+              }}
+            >
+              📄 Descargar Boletín
+            </button>
+          ) : null
+        }
+      />
 
       {cursos.length === 0 ? (
-        <div className={styles.emptyState}>
-          <span className={styles.emptyIcon}>📊</span>
-          <p className={styles.emptyText}>
-            No tienes cursos con calificaciones registradas
-          </p>
+        <div style={{ textAlign: "center", padding: "50px 20px", background: "#fff", borderRadius: "10px", border: "1px solid #dde3ec" }}>
+          <div style={{ fontSize: "3rem", marginBottom: "12px" }}>📊</div>
+          <div style={{ fontSize: "15px", fontWeight: 700, color: "#0f2744", marginBottom: "6px" }}>
+            Sin calificaciones registradas
+          </div>
+          <div style={{ fontSize: "12.5px", color: "#6b7280" }}>
+            El docente aún no ha registrado notas en tus cursos
+          </div>
         </div>
       ) : (
         <>
-          <div className={styles.tableContainer}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>CURSO</th>
-                  <th>PARCIAL 1</th>
-                  <th>PARCIAL 2</th>
-                  <th>FINAL</th>
-                  <th>PROMEDIO</th>
-                  <th>ESTADO</th>
-                </tr>
-              </thead>
-              <tbody>
-                {cursos.map((curso) => {
-                  const promedio = calcularPromedioCurso(curso.id_curso);
-                  const estado = obtenerEstadoCurso(promedio);
-                  return (
-                    <tr key={curso.id_curso}>
-                      <td className={styles.cursoNombre}>{curso.nombre}</td>
-                      <td>{obtenerNotaPorTipo(curso.id_curso, 1)}</td>
-                      <td>{obtenerNotaPorTipo(curso.id_curso, 2)}</td>
-                      <td>{obtenerNotaPorTipo(curso.id_curso, 3)}</td>
-                      <td className={styles.promedio}>{promedio}</td>
-                      <td>
-                        <span
-                          className={`${styles.badge} ${
-                            estado === "APROBADO"
-                              ? styles.aprobado
-                              : estado === "REPROBADO"
-                              ? styles.reprobado
-                              : styles.enProgreso
-                          }`}
-                        >
-                          {estado}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          {cursos.map((curso) => (
+            <NotaResumen
+              key={curso.id_curso}
+              nombreCurso={curso.nombre}
+              parcial1={getRawNota(curso.id_curso, 1)}
+              parcial2={getRawNota(curso.id_curso, 2)}
+              final={getRawNota(curso.id_curso, 3)}
+            />
+          ))}
 
-          <div className={styles.promedioGeneral}>
-            <h2>Promedio General del Semestre:</h2>
-            <div className={styles.promedioValor}>
-              {calcularPromedioGeneral()}
-            </div>
+          <div style={{
+            background:     "#fff",
+            borderRadius:   "10px",
+            border:         "1px solid #dde3ec",
+            padding:        "14px 18px",
+            display:        "flex",
+            alignItems:     "center",
+            justifyContent: "space-between",
+            marginTop:      "4px",
+          }}>
+            <span style={{ fontSize: "13px", fontWeight: 600, color: "#6b7280" }}>
+              Promedio general de todos los cursos
+            </span>
+            <span style={{ fontSize: "22px", fontWeight: 800, color: "#0f2744" }}>
+              {promedioGeneral} / 5.0
+            </span>
           </div>
         </>
       )}

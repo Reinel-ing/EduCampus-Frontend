@@ -48,18 +48,17 @@ const MisCursos = () => {
 
   if (loading) {
     return (
-      <div className={styles.loadingContainer}>
-        <div className={styles.spinner}></div>
-        <p>Cargando cursos...</p>
+      <div style={{ display:"flex", justifyContent:"center", alignItems:"center", height:"400px" }}>
+        <div style={{ width:40, height:40, border:"4px solid #e2e8f0", borderTopColor:"#1e40af", borderRadius:"50%", animation:"spin 1s linear infinite" }} />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className={styles.errorContainer}>
-        <p className={styles.errorMessage}>Error: {error}</p>
-        <button onClick={cargarCursos} className={styles.retryButton}>
+      <div style={{ padding:"3rem", textAlign:"center", color:"#dc2626" }}>
+        <p>Error: {error}</p>
+        <button onClick={cargarCursos} style={{ marginTop:"1rem", padding:"8px 20px", background:"#1e40af", color:"#fff", border:"none", borderRadius:"8px", cursor:"pointer", fontWeight:600 }}>
           Reintentar
         </button>
       </div>
@@ -67,14 +66,19 @@ const MisCursos = () => {
   }
 
   return (
-    <div className={styles.container}>
+    <div style={{ padding:"22px 24px", background:"#f0f4f8", minHeight:"100%", boxSizing:"border-box" }}>
+      {/* Banner institucional */}
+      <div style={{ background:"linear-gradient(135deg,#0f2744 0%,#1e40af 100%)", borderRadius:"12px", padding:"18px 24px", marginBottom:"16px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+        <div>
+          <div style={{ fontSize:"17px", fontWeight:800, color:"#fff", marginBottom:"3px" }}>Mis Cursos</div>
+          <div style={{ fontSize:"12.5px", color:"rgba(255,255,255,.6)" }}>{cursos.length} {cursos.length === 1 ? "curso asignado" : "cursos asignados"}</div>
+        </div>
+        <div style={{ fontSize:"36px", opacity:0.7 }}>📚</div>
+      </div>
+      <div className={styles.container}>
       <div className={styles.header}>
         <div>
-          <h2 className={styles.title}>Mis Cursos</h2>
-          <p className={styles.subtitle}>
-            {cursos.length}{" "}
-            {cursos.length === 1 ? "curso asignado" : "cursos asignados"}
-          </p>
+          <div style={{ display:"none" }}></div>
         </div>
       </div>
 
@@ -106,6 +110,7 @@ const MisCursos = () => {
           }}
         />
       )}
+    </div>
     </div>
   );
 };

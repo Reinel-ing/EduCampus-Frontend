@@ -1,4 +1,4 @@
-.container {
+﻿.container {
   padding: 2rem;
   max-width: 1400px;
   margin: 0 auto;
@@ -55,8 +55,8 @@
 
 .selectorCurso:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #1e40af;
+  box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
 }
 
 /* Botón Agregar */
@@ -98,7 +98,7 @@
 }
 
 .tableHeader {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
   color: white;
   text-align: left;
   padding: 1rem 1.5rem;
@@ -131,7 +131,7 @@
 .promedioBadge {
   display: inline-block;
   padding: 0.5rem 1rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
   color: white;
   border-radius: 6px;
   font-weight: 700;
@@ -196,7 +196,7 @@
   width: 50px;
   height: 50px;
   border: 4px solid #e2e8f0;
-  border-top-color: #667eea;
+  border-top-color: #1e40af;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -263,7 +263,7 @@
   align-items: center;
   padding: 1.5rem;
   border-bottom: 2px solid #e2e8f0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
   border-radius: 12px 12px 0 0;
 }
 
@@ -321,8 +321,8 @@
 
 .formInput:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #1e40af;
+  box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
 }
 
 .formInput:disabled {
@@ -357,7 +357,7 @@
 
 .btnGuardar {
   padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
   color: white;
   border: none;
   border-radius: 8px;
@@ -369,7 +369,7 @@
 
 .btnGuardar:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 6px 20px rgba(30, 64, 175, 0.4);
 }
 
 .btnGuardar:active {

@@ -143,3 +143,16 @@ export const obtenerHorarioEstudiante = async (estudianteId) => {
     return { error: true, message: error.message };
   }
 };
+
+export const obtenerHorarioDocente = async (docenteId) => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/cursos/horario-docente/${docenteId}`
+    );
+    if (!response.ok)
+      throw new Error("No se pudo obtener el horario del docente");
+    return response.json();
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};

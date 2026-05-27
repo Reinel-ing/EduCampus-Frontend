@@ -1,7 +1,7 @@
 .adminLayout {
   display: flex;
   min-height: 100vh;
-  background-color: #f3f4f6;
+  background-color: #f0f4f8;
 }
 
 .mainContent {
@@ -15,18 +15,15 @@
 
 .mainContainer {
   flex: 1;
-  padding: 2rem;
+  display: flex;
+  flex-direction: column;
   overflow-y: auto;
   max-height: 100vh;
 }
 
 .contentWrapper {
-  background-color: #ffffff;
-  border-radius: 0.75rem;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-  padding: 2rem;
+  flex: 1;
   overflow-y: auto;
-  max-height: calc(100vh - 8rem);
 }
 
 @media (max-width: 768px) {

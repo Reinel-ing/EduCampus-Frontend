@@ -1,17 +1,22 @@
+import { hashPassword } from "../utils/crypto";
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Iniciar sesión
 export const iniciarSesion = async (correo, contraseña) => {
   try {
+    // Hashear la contraseña ANTES de enviarla — nunca viaja en texto plano
+    const contraseñaHash = await hashPassword(contraseña);
+
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-     body: JSON.stringify({
-  correo,
-  contraseña,
-}),
+      body: JSON.stringify({
+        correo,
+        contraseña: contraseñaHash,
+      }),
     });
 
     if (!response.ok) {

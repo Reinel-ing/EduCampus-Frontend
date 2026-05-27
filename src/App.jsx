@@ -13,12 +13,19 @@ import GestionCursos from "./pages/admin/GestionCursos";
 import Reportes from "./pages/admin/Reportes";
 import Configuracion from "./pages/admin/Configuracion";
 import Matriculas from "./pages/admin/Matriculas";
+import NotificacionesAdmin from "./pages/admin/NotificacionesAdmin";
+import CalendarioAdmin from "./pages/admin/CalendarioAdmin";
+import RendimientoAdmin from "./pages/admin/RendimientoAdmin";
+import AlertasAdmin from "./pages/admin/AlertasAdmin";
 import DashboardDocente from "./pages/docente/DashboardDocente";
 import MisCursos from "./pages/docente/MisCursos";
 import ListaEstudiantes from "./pages/docente/ListaEstudiantes";
 import Calificaciones from "./pages/docente/Calificaciones";
 import MaterialDidactico from "./pages/docente/MaterialDidactico";
 import AsistenciaDocente from "./pages/docente/AsistenciaDocente";
+import CalendarioDocente from "./pages/docente/CalendarioDocente";
+import NotificacionesDocente from "./pages/docente/NotificacionesDocente";
+import ActividadesDocente from "./pages/docente/ActividadesDocente";
 import DashboardEstudiante from "./pages/usuario/DashboardEstudiante";
 import MisCursosEstudiante from "./pages/usuario/MisCursos";
 import CalificacionesEstudiante from "./pages/usuario/Calificaciones";
@@ -26,6 +33,8 @@ import HorarioEstudiante from "./pages/usuario/Horario";
 import AsistenciaEstudiante from "./pages/usuario/AsistenciaEstudiante";
 import MaterialesEstudiante from "./pages/usuario/MaterialesEstudiante";
 import CalendarioEstudiante from "./pages/usuario/CalendarioEstudiante";
+import NotificacionesEstudiante from "./pages/usuario/NotificacionesEstudiante";
+import ActividadesEstudiante from "./pages/usuario/ActividadesEstudiante";
 import { ADMIN_ROUTES, DOCENTE_ROUTES, USUARIO_ROUTES } from "./constant/routes";
 
 function App() {
@@ -48,6 +57,10 @@ function App() {
             <Route path="matriculas" element={<Matriculas />} />
             <Route path="reportes" element={<Reportes />} />
             <Route path="configuracion" element={<Configuracion />} />
+            <Route path="notificaciones" element={<NotificacionesAdmin />} />
+            <Route path="calendario" element={<CalendarioAdmin />} />
+            <Route path="rendimiento" element={<RendimientoAdmin />} />
+            <Route path="alertas" element={<AlertasAdmin />} />
           </Route>
 
           {/* Docente */}
@@ -63,6 +76,9 @@ function App() {
             <Route path="asistencia" element={<AsistenciaDocente />} />
             <Route path="calificaciones" element={<Calificaciones />} />
             <Route path="material" element={<MaterialDidactico />} />
+            <Route path="calendario" element={<CalendarioDocente />} />
+            <Route path="notificaciones" element={<NotificacionesDocente />} />
+            <Route path="actividades" element={<ActividadesDocente />} />
           </Route>
 
           {/* Estudiante */}
@@ -79,6 +95,8 @@ function App() {
             <Route path="materiales" element={<MaterialesEstudiante />} />
             <Route path="horario" element={<HorarioEstudiante />} />
             <Route path="calendario" element={<CalendarioEstudiante />} />
+            <Route path="notificaciones" element={<NotificacionesEstudiante />} />
+            <Route path="actividades" element={<ActividadesEstudiante />} />
           </Route>
 
           <Route path="/" element={<Navigate to="/login" replace />} />

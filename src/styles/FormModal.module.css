@@ -1,4 +1,4 @@
-.modalOverlay {
+﻿.modalOverlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -50,7 +50,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #0f2744 0%, #1e40af 100%);
   border-radius: 1rem 1rem 0 0;
 }
 
@@ -138,8 +138,8 @@
 
 .input:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .input.error {
@@ -165,8 +165,8 @@
 
 .select:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .errorMessage {
@@ -192,7 +192,7 @@
   width: 1.25rem;
   height: 1.25rem;
   cursor: pointer;
-  accent-color: #667eea;
+  accent-color: #2563eb;
 }
 
 .checkboxLabel {
@@ -237,13 +237,13 @@
 }
 
 .buttonSubmit {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #0f2744 0%, #1e40af 100%);
   color: #ffffff;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
 .buttonSubmit:hover {
-  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
   transform: translateY(-2px);
 }
 
@@ -278,10 +278,10 @@
 }
 
 .modalContent::-webkit-scrollbar-thumb {
-  background: #667eea;
+  background: #2563eb;
   border-radius: 4px;
 }
 
 .modalContent::-webkit-scrollbar-thumb:hover {
-  background: #5568d3;
+  background: #1d4ed8;
 }

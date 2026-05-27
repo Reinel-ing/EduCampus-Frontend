@@ -1,4 +1,4 @@
-.overlay {
+﻿.overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -52,7 +52,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 24px 32px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
   color: white;
   border-bottom: 3px solid rgba(255, 255, 255, 0.2);
 }
@@ -135,13 +135,13 @@
 }
 
 .tab:hover {
-  color: #667eea;
-  background: rgba(102, 126, 234, 0.05);
+  color: #1e40af;
+  background: rgba(30, 64, 175, 0.05);
 }
 
 .activeTab {
-  color: #667eea;
-  border-bottom-color: #667eea;
+  color: #1e40af;
+  border-bottom-color: #1e40af;
   background: white;
 }
 
@@ -251,7 +251,7 @@
 .progressPercent {
   font-weight: 700;
   font-size: 20px;
-  color: #667eea;
+  color: #1e40af;
 }
 
 .progressBar {
@@ -355,7 +355,7 @@
 .estudianteCard:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  border-color: #667eea;
+  border-color: #1e40af;
 }
 
 .estudianteHeader {
@@ -367,7 +367,7 @@
 .estudianteAvatar {
   width: 48px;
   height: 48px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
   color: white;
   border-radius: 10px;
   display: flex;
@@ -455,14 +455,14 @@
 }
 
 .horarioCard:hover {
-  border-color: #667eea;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+  border-color: #1e40af;
+  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.15);
 }
 
 .horarioDia {
   font-size: 20px;
   font-weight: 700;
-  color: #667eea;
+  color: #1e40af;
   text-align: center;
   padding: 12px;
   background: linear-gradient(135deg, #f0f4ff 0%, #e5edff 100%);
@@ -500,7 +500,7 @@
 
 .horarioArrow {
   font-size: 24px;
-  color: #667eea;
+  color: #1e40af;
   font-weight: 700;
 }
 
@@ -613,7 +613,7 @@
 .timelineDayName {
   font-size: 13px;
   font-weight: 700;
-  color: #667eea;
+  color: #1e40af;
   text-align: center;
   padding: 8px;
   background: #f0f4ff;
@@ -627,7 +627,7 @@
 }
 
 .timelineClass {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
   color: white;
   padding: 8px 4px;
   border-radius: 6px;
@@ -680,7 +680,7 @@
   width: 48px;
   height: 48px;
   border: 4px solid #f3f4f6;
-  border-top-color: #667eea;
+  border-top-color: #1e40af;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -755,7 +755,7 @@
 
 .btnAgregarEstudiante {
   padding: 10px 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
   color: white;
   border: none;
   border-radius: 8px;
@@ -763,12 +763,12 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 15px rgba(30, 64, 175, 0.3);
 }
 
 .btnAgregarEstudiante:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 6px 20px rgba(30, 64, 175, 0.4);
 }
 
 .btnAgregarEstudiante:disabled {
@@ -796,7 +796,7 @@
 .btnEmptyAction {
   margin-top: 15px;
   padding: 10px 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
   color: white;
   border: none;
   border-radius: 8px;
@@ -808,7 +808,7 @@
 
 .btnEmptyAction:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 6px 20px rgba(30, 64, 175, 0.4);
 }
 
 /* Modal de inscripción */
@@ -881,7 +881,7 @@
   padding: 16px;
   border-radius: 8px;
   margin-bottom: 20px;
-  border-left: 4px solid #667eea;
+  border-left: 4px solid #1e40af;
 }
 
 .modalInfo p {
@@ -916,8 +916,8 @@
 
 .formSelect:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #1e40af;
+  box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
 }
 
 .formSelect:disabled {
@@ -968,7 +968,7 @@
 
 .btnInscribir {
   padding: 10px 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
   color: white;
   border: none;
   border-radius: 8px;
@@ -976,12 +976,12 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 15px rgba(30, 64, 175, 0.3);
 }
 
 .btnInscribir:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 6px 20px rgba(30, 64, 175, 0.4);
 }
 
 .btnInscribir:disabled {

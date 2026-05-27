@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 
-import { useAuth }                  from "../../context/AuthContext";
-import { obtenerHorarioEstudiante } from "../../services/cursoService";
+import { useAuth }                 from "../../context/AuthContext";
+import { obtenerCursosPorDocente } from "../../services/cursoService";
 import BannerPage from "../../components/estudiante/BannerPage";
 
 const DIAS_SEMANA = ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"];
@@ -64,19 +64,42 @@ const styles = {
     textAlign:    "center",
   },
 
-  sideCard:  { background: "#fff", borderRadius: "10px", border: "1px solid #dde3ec", padding: "16px" },
-  sideTitle: { fontSize: "11px", fontWeight: 700, color: "#0f2744", textTransform: "uppercase", letterSpacing: "0.6px", marginBottom: "12px", paddingBottom: "8px", borderBottom: "1px solid #f3f4f6" },
+  sideCard:    { background: "#fff", borderRadius: "10px", border: "1px solid #dde3ec", padding: "16px" },
+  sideTitle:   { fontSize: "11px", fontWeight: 700, color: "#0f2744", textTransform: "uppercase", letterSpacing: "0.6px", marginBottom: "12px", paddingBottom: "8px", borderBottom: "1px solid #f3f4f6" },
   claseItem:   { display: "flex", gap: "10px", padding: "8px 0", alignItems: "flex-start" },
   claseNombre: { fontSize: "12.5px", fontWeight: 600, color: "#0f2744" },
   claseDia:    { fontSize: "11px", color: "#9ca3af", marginTop: "2px" },
 };
 
-const CalendarioEstudiante = () => {
+// Convierte el JSONB de horario a entradas planas {dia, hora, nombre_curso}
+// Soporta objetos ({dia, horaInicio, horaFin}) y strings ("Lunes 08:00-10:00")
+function parsearHorario(cursos) {
+  const clases = [];
+  cursos.forEach((curso) => {
+    if (!Array.isArray(curso.horario)) return;
+    curso.horario.forEach((h) => {
+      let dia  = h.dia ?? "";
+      let hora = "";
+
+      if (typeof h === "string") {
+        const match = h.match(/^(\w+)\s+(.+)$/);
+        if (match) { dia = match[1]; hora = match[2]; }
+      } else {
+        if (h.horaInicio && h.horaFin) hora = `${h.horaInicio}-${h.horaFin}`;
+      }
+
+      if (dia) clases.push({ dia, hora, nombre_curso: curso.nombre });
+    });
+  });
+  return clases;
+}
+
+const CalendarioDocente = () => {
   const { usuario } = useAuth();
-  const [horarios,  setHorarios]  = useState([]);
-  const [loading,   setLoading]   = useState(true);
-  const [mes,       setMes]       = useState(new Date());
-  const [diaSelec,  setDiaSelec]  = useState(null);
+  const [clases,   setClases]   = useState([]);
+  const [loading,  setLoading]  = useState(true);
+  const [mes,      setMes]      = useState(new Date());
+  const [diaSelec, setDiaSelec] = useState(null);
 
   const hoy = new Date();
 
@@ -84,10 +107,10 @@ const CalendarioEstudiante = () => {
 
   const cargarHorario = async () => {
     try {
-      const data = await obtenerHorarioEstudiante(usuario.id);
-      if (!data?.error && Array.isArray(data)) setHorarios(data);
+      const data = await obtenerCursosPorDocente(usuario.id);
+      if (!data?.error && Array.isArray(data)) setClases(parsearHorario(data));
     } catch (error) {
-      console.error("[CalendarioEstudiante]", error);
+      console.error("[CalendarioDocente]", error);
     } finally {
       setLoading(false);
     }
@@ -98,8 +121,8 @@ const CalendarioEstudiante = () => {
     setDiaSelec(null);
   };
 
-  const tieneClase   = (diaSemana) => horarios.some((h) => h.dia === DIAS_FULL[diaSemana]);
-  const clasesDelDia = (diaSemana) => horarios.filter((h) => h.dia === DIAS_FULL[diaSemana]);
+  const tieneClase   = (diaSemana) => clases.some((c) => c.dia === DIAS_FULL[diaSemana]);
+  const clasesDelDia = (diaSemana) => clases.filter((c) => c.dia === DIAS_FULL[diaSemana]);
 
   const primerDia = new Date(mes.getFullYear(), mes.getMonth(), 1).getDay();
   const diasEnMes = new Date(mes.getFullYear(), mes.getMonth() + 1, 0).getDate();
@@ -112,9 +135,9 @@ const CalendarioEstudiante = () => {
     ? clasesDelDia(new Date(mes.getFullYear(), mes.getMonth(), diaSelec).getDay())
     : [];
 
-  const clasesOrdenadas = horarios.slice().sort(
-    (a, b) => DIAS_FULL.indexOf(a.dia) - DIAS_FULL.indexOf(b.dia)
-  );
+  const clasesSemanales = clases
+    .slice()
+    .sort((a, b) => DIAS_FULL.indexOf(a.dia) - DIAS_FULL.indexOf(b.dia));
 
   if (loading) {
     return (
@@ -137,10 +160,10 @@ const CalendarioEstudiante = () => {
 
       <BannerPage
         icono="🗓️"
-        titulo="Calendario Academico"
+        titulo="Calendario de Clases"
         subtitulo={
-          horarios.length > 0
-            ? `${horarios.length} clase${horarios.length !== 1 ? "s" : ""} en tu horario`
+          clases.length > 0
+            ? `${clases.length} sesion${clases.length !== 1 ? "es" : ""} semanales programadas`
             : "Sin clases programadas"
         }
         extra={navMes}
@@ -190,7 +213,7 @@ const CalendarioEstudiante = () => {
                     borderBottom: i < clasesDiaSelec.length - 1 ? "1px solid #f9fafb" : "none",
                   }}
                 >
-                  <div style={styles.claseHoraBox}>{c.hora}</div>
+                  <div style={styles.claseHoraBox}>{c.hora || "—"}</div>
                   <div style={{ fontSize: "12.5px", fontWeight: 600, color: "#0f2744" }}>{c.nombre_curso}</div>
                 </div>
               ))}
@@ -211,21 +234,23 @@ const CalendarioEstudiante = () => {
         </div>
 
         <div style={styles.sideCard}>
-          <div style={styles.sideTitle}>Mis Clases Semanales</div>
-          {clasesOrdenadas.length === 0 ? (
+          <div style={styles.sideTitle}>Mi Horario Semanal</div>
+          {clasesSemanales.length === 0 ? (
             <div style={{ textAlign: "center", padding: "20px 0", color: "#9ca3af", fontSize: "12.5px" }}>
               Sin clases programadas
             </div>
           ) : (
-            clasesOrdenadas.map((c, i) => (
+            clasesSemanales.map((c, i) => (
               <div
                 key={i}
                 style={{
                   ...styles.claseItem,
-                  borderBottom: i < clasesOrdenadas.length - 1 ? "1px solid #f9fafb" : "none",
+                  borderBottom: i < clasesSemanales.length - 1 ? "1px solid #f9fafb" : "none",
                 }}
               >
-                <div style={styles.claseHoraBox}>{c.hora.split("-")[0]}</div>
+                <div style={styles.claseHoraBox}>
+                  {c.hora ? c.hora.split("-")[0] : "—"}
+                </div>
                 <div>
                   <div style={styles.claseNombre}>{c.nombre_curso}</div>
                   <div style={styles.claseDia}>{c.dia}</div>
@@ -239,4 +264,4 @@ const CalendarioEstudiante = () => {
   );
 };
 
-export default CalendarioEstudiante;
+export default CalendarioDocente;

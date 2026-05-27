@@ -55,9 +55,9 @@ const GestionUsuarios = () => {
     {
       name: "correo",
       label: "Correo Electrónico",
-      type: "email",
+      type: "text",
       required: true,
-      placeholder: "Ej: docente@email.com",
+      placeholder: "Ej: docente@gmail.com o @outlook.com",
     },
     {
       name: "contraseña",
@@ -109,9 +109,9 @@ const GestionUsuarios = () => {
     {
       name: "correo",
       label: "Correo Electrónico",
-      type: "email",
+      type: "text",
       required: true,
-      placeholder: "Ej: estudiante@email.com",
+      placeholder: "Ej: estudiante@gmail.com o @outlook.com",
     },
     {
       name: "contraseña",
@@ -227,6 +227,15 @@ const GestionUsuarios = () => {
   };
 
   return (
+    <div style={{ padding:"22px 24px", background:"#f0f4f8", minHeight:"100%", boxSizing:"border-box" }}>
+      {/* Banner institucional */}
+      <div style={{ background:"linear-gradient(135deg,#0f2744 0%,#1e40af 100%)", borderRadius:"12px", padding:"18px 24px", marginBottom:"16px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+        <div>
+          <div style={{ fontSize:"17px", fontWeight:800, color:"#fff", marginBottom:"3px" }}>Gestión de Usuarios</div>
+          <div style={{ fontSize:"12.5px", color:"rgba(255,255,255,.6)" }}>Administra docentes y estudiantes del sistema</div>
+        </div>
+        <div style={{ fontSize:"36px", opacity:0.7 }}>👥</div>
+      </div>
     <div className={styles.container}>
       {/* Sección Docentes */}
       <section className={styles.section}>
@@ -289,6 +298,7 @@ const GestionUsuarios = () => {
         validationErrors={estudianteErrors}
         isLoading={isLoading}
       />
+    </div>
     </div>
   );
 };

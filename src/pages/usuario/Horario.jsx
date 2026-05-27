@@ -1,187 +1,195 @@
 import React, { useState, useEffect } from "react";
-import { useAuth } from "../../context/AuthContext";
-import { obtenerHorarioEstudiante } from "../../services/cursoService";
-import jsPDF from "jspdf";
+import jsPDF     from "jspdf";
 import autoTable from "jspdf-autotable";
-import styles from "../../styles/HorarioEstudiante.module.css";
+
+import { useAuth }                  from "../../context/AuthContext";
+import { obtenerHorarioEstudiante } from "../../services/cursoService";
+import BannerPage from "../../components/estudiante/BannerPage";
+import { dayColors } from "../../theme";
+
+const ORDEN_DIAS = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"];
+
+const styles = {
+  page: { padding: "22px 24px", background: "#f0f4f8", minHeight: "100%", boxSizing: "border-box" },
+
+  diasGrid: { display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "14px" },
+
+  diaCard: {
+    background:   "#fff",
+    borderRadius: "10px",
+    border:       "1px solid #dde3ec",
+    overflow:     "hidden",
+  },
+  diaHeader: {
+    padding:        "10px 16px",
+    display:        "flex",
+    alignItems:     "center",
+    justifyContent: "space-between",
+  },
+  diaNombre: { fontSize: "13px", fontWeight: 800, color: "#fff" },
+  diaBadge: {
+    fontSize:     "10px",
+    fontWeight:   700,
+    color:        "#fff",
+    background:   "rgba(255,255,255,0.25)",
+    borderRadius: "10px",
+    padding:      "2px 8px",
+  },
+  claseItem: {
+    display:    "flex",
+    alignItems: "center",
+    gap:        "12px",
+    padding:    "12px 16px",
+  },
+  claseHoraBox: (color) => ({
+    background:   `${color}18`,
+    border:       `1px solid ${color}40`,
+    borderRadius: "7px",
+    padding:      "6px 10px",
+    textAlign:    "center",
+    flexShrink:   0,
+    minWidth:     "80px",
+  }),
+  claseHora:   (color) => ({ fontSize: "11px", fontWeight: 800, color }),
+  claseNombre: { fontSize: "13px", fontWeight: 700, color: "#0f2744" },
+
+  empty: {
+    textAlign:    "center",
+    padding:      "50px 20px",
+    background:   "#fff",
+    borderRadius: "10px",
+    border:       "1px solid #dde3ec",
+  },
+
+  btnPDF: {
+    padding:      "9px 18px",
+    background:   "rgba(255,255,255,0.15)",
+    border:       "1px solid rgba(255,255,255,0.3)",
+    borderRadius: "8px",
+    color:        "#fff",
+    fontWeight:   700,
+    fontSize:     "12.5px",
+    cursor:       "pointer",
+  },
+};
 
 const Horario = () => {
   const { usuario } = useAuth();
   const [horarios, setHorarios] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading,  setLoading]  = useState(true);
 
-  const diasSemana = [
-    "Lunes",
-    "Martes",
-    "Miércoles",
-    "Jueves",
-    "Viernes",
-    "Sábado",
-  ];
-
-  const horasBloque = [
-    "08:00-10:00",
-    "09:00-11:00",
-    "10:00-12:00",
-    "11:00-13:00",
-    "14:00-16:00",
-    "15:00-17:00",
-    "16:00-18:00",
-  ];
-
-  useEffect(() => {
-    cargarHorario();
-  }, [usuario]);
+  useEffect(() => { cargarHorario(); }, [usuario]);
 
   const cargarHorario = async () => {
     try {
-      setLoading(true);
       const data = await obtenerHorarioEstudiante(usuario.id);
-      console.log("Horarios recibidos:", data);
-      if (!data.error && Array.isArray(data)) {
-        setHorarios(data);
-      }
+      if (!data?.error && Array.isArray(data)) setHorarios(data);
     } catch (error) {
-      console.error("Error al cargar horario:", error);
+      console.error("[Horario]", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const obtenerClasePorDiaYHora = (dia, hora) => {
-    // Buscar exactamente por día y hora
-    const claseExacta = horarios.find((h) => h.dia === dia && h.hora === hora);
-    if (claseExacta) return claseExacta;
+  // agrupa por dia respetando el orden lunes-domingo
+  const porDia = ORDEN_DIAS.reduce((acc, dia) => {
+    const clases = horarios.filter((h) => h.dia === dia);
+    if (clases.length > 0) acc[dia] = clases;
+    return acc;
+  }, {});
+  const diasConClases = Object.keys(porDia);
 
-    // Si no hay coincidencia exacta, buscar si la hora del curso cae dentro del bloque
-    return horarios.find((h) => {
-      if (h.dia !== dia) return false;
-
-      // Extraer horas de inicio y fin del bloque y del curso
-      const [bloqueInicio] = hora.split("-");
-      const [cursoInicio, cursoFin] = h.hora.split("-");
-
-      return bloqueInicio >= cursoInicio && bloqueInicio < cursoFin;
-    });
-  };
-
-  const descargarHorario = () => {
+  const descargarPDF = () => {
     const doc = new jsPDF();
-
-    // Título
     doc.setFontSize(18);
     doc.text("Mi Horario Semanal", 105, 15, { align: "center" });
     doc.setFontSize(12);
     doc.text(`Estudiante: ${usuario.nombres} ${usuario.apellidos}`, 14, 25);
     doc.setFontSize(10);
-    doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 14, 32);
+    doc.text(`Fecha: ${new Date().toLocaleDateString("es-ES")}`, 14, 32);
 
-    // Preparar datos para la tabla
-    const headers = [
-      ["HORA", "LUNES", "MARTES", "MIÉRCOLES", "JUEVES", "VIERNES", "SÁBADO"],
-    ];
-    const rows = horasBloque.map((hora) => {
-      const row = [hora];
-      diasSemana.forEach((dia) => {
-        const clase = obtenerClasePorDiaYHora(dia, hora);
-        row.push(
-          clase
-            ? `${clase.nombre_curso}${clase.aula ? `\n${clase.aula}` : ""}`
-            : ""
-        );
-      });
-      return row;
-    });
-
-    // Generar tabla
     autoTable(doc, {
-      head: headers,
-      body: rows,
+      head: [["DIA", "HORA", "CURSO"]],
+      body: horarios.map((h) => [h.dia, h.hora, h.nombre_curso]),
       startY: 38,
       theme: "grid",
-      headStyles: {
-        fillColor: [102, 126, 234],
-        fontSize: 9,
-        fontStyle: "bold",
-      },
-      bodyStyles: {
-        fontSize: 8,
-      },
-      columnStyles: {
-        0: { cellWidth: 25, fontStyle: "bold" },
-      },
+      headStyles: { fillColor: [30, 64, 175], fontSize: 10, fontStyle: "bold" },
+      bodyStyles: { fontSize: 9 },
+      columnStyles: { 0: { cellWidth: 30 }, 1: { cellWidth: 35 } },
     });
 
-    // Descargar
     doc.save(`Horario_${usuario.nombres}_${usuario.apellidos}.pdf`);
   };
 
   if (loading) {
     return (
-      <div className={styles.loadingContainer}>
-        <div className={styles.spinner}></div>
-        <p>Cargando horario...</p>
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "400px" }}>
+        <div style={{ width: 40, height: 40, border: "4px solid #e2e8f0", borderTopColor: "#1e40af", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
       </div>
     );
   }
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <h1 className={styles.title}>Mi Horario Semanal</h1>
-        <button className={styles.btnDescargar} onClick={descargarHorario}>
-          📄 Descargar Horario
-        </button>
-      </div>
+    <div style={styles.page}>
 
-      <div className={styles.horarioWrapper}>
-        <table className={styles.horarioTable}>
-          <thead>
-            <tr>
-              <th className={styles.headerHora}>HORA</th>
-              {diasSemana.map((dia) => (
-                <th key={dia} className={styles.headerDia}>
-                  {dia.toUpperCase()}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {horasBloque.map((hora) => (
-              <tr key={hora}>
-                <td className={styles.celdaHora}>{hora}</td>
-                {diasSemana.map((dia) => {
-                  const clase = obtenerClasePorDiaYHora(dia, hora);
-                  return (
-                    <td
-                      key={`${dia}-${hora}`}
-                      className={`${styles.celdaDia} ${
-                        clase ? styles.celdaConClase : ""
-                      }`}
-                    >
-                      {clase && (
-                        <div className={styles.claseCard}>
-                          <div className={styles.claseNombre}>
-                            {clase.nombre_curso}
-                          </div>
-                          <div className={styles.claseInfo}>
-                            {clase.aula || "Sin aula"}
-                          </div>
-                        </div>
-                      )}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <BannerPage
+        icono="📆"
+        titulo="Mi Horario Semanal"
+        subtitulo={
+          diasConClases.length > 0
+            ? `${horarios.length} clase${horarios.length !== 1 ? "s" : ""} en ${diasConClases.length} dia${diasConClases.length !== 1 ? "s" : ""}`
+            : "No tienes clases programadas"
+        }
+        extra={
+          horarios.length > 0 ? (
+            <button style={styles.btnPDF} onClick={descargarPDF}>
+              📄 Descargar PDF
+            </button>
+          ) : null
+        }
+      />
 
-      {horarios.length === 0 && (
-        <div className={styles.emptyState}>
-          <span className={styles.emptyIcon}>📅</span>
-          <p className={styles.emptyText}>No tienes clases programadas</p>
+      {diasConClases.length === 0 ? (
+        <div style={styles.empty}>
+          <div style={{ fontSize: "3rem", marginBottom: "12px" }}>📅</div>
+          <div style={{ fontSize: "15px", fontWeight: 700, color: "#0f2744", marginBottom: "6px" }}>
+            Sin clases programadas
+          </div>
+          <div style={{ fontSize: "12.5px", color: "#6b7280" }}>
+            Aun no tienes cursos con horario asignado
+          </div>
+        </div>
+      ) : (
+        <div style={styles.diasGrid}>
+          {diasConClases.map((dia, index) => {
+            const color  = dayColors[index % dayColors.length];
+            const clases = porDia[dia];
+            return (
+              <div key={dia} style={styles.diaCard}>
+                <div style={{ ...styles.diaHeader, background: color }}>
+                  <span style={styles.diaNombre}>{dia}</span>
+                  <span style={styles.diaBadge}>
+                    {clases.length} clase{clases.length !== 1 ? "s" : ""}
+                  </span>
+                </div>
+
+                {clases.map((c, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      ...styles.claseItem,
+                      borderBottom: i < clases.length - 1 ? "1px solid #f3f4f6" : "none",
+                    }}
+                  >
+                    <div style={styles.claseHoraBox(color)}>
+                      <div style={styles.claseHora(color)}>{c.hora}</div>
+                    </div>
+                    <div style={styles.claseNombre}>{c.nombre_curso}</div>
+                  </div>
+                ))}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

@@ -1,13 +1,21 @@
+import { hashPassword } from "../utils/crypto";
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export const crearEstudiante = async (estudiante) => {
   try {
+    // Hashear la contraseña antes de enviarla
+    const payload = { ...estudiante };
+    if (payload.contraseña) {
+      payload.contraseña = await hashPassword(payload.contraseña);
+    }
+
     const response = await fetch(`${API_BASE_URL}/estudiantes/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(estudiante),
+      body: JSON.stringify(payload),
     });
     if (!response.ok)
       throw new Error("No se pudo conectar con la API de estudiantes");
@@ -41,6 +49,12 @@ export const obtenerEstudiantePorId = async (estudianteId) => {
 
 export const actualizarEstudiante = async (estudianteId, datos) => {
   try {
+    // Si se actualiza la contraseña, hashearla antes de enviar
+    const payload = { ...datos };
+    if (payload.contraseña) {
+      payload.contraseña = await hashPassword(payload.contraseña);
+    }
+
     const response = await fetch(
       `${API_BASE_URL}/estudiantes/${estudianteId}`,
       {
@@ -48,7 +62,7 @@ export const actualizarEstudiante = async (estudianteId, datos) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(datos),
+        body: JSON.stringify(payload),
       }
     );
     if (!response.ok)

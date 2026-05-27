@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { obtenerCursosPorDocente } from "../../services/cursoService";
 import { obtenerEstudiantesConDetallesPorCurso } from "../../services/inscripcionService";
@@ -63,10 +63,14 @@ const AsistenciaDocente = () => {
   const ausentes = estudiantes.length - presentes;
 
   return (
-    <div style={{ padding: "1.5rem" }}>
-      <div style={{ marginBottom: "1.5rem" }}>
-        <h1 style={{ fontSize: "1.75rem", fontWeight: 700, color: "#1e293b", margin: 0 }}>✅ Registro de Asistencia</h1>
-        <p style={{ color: "#64748b", margin: "0.25rem 0 0" }}>Registra la asistencia de tus estudiantes</p>
+    <div style={{ padding: "22px 24px", background: "#f0f4f8", minHeight: "100%", boxSizing: "border-box" }}>
+      {/* Banner */}
+      <div style={{ background: "linear-gradient(135deg,#0f2744 0%,#1e40af 100%)", borderRadius: "12px", padding: "18px 24px", marginBottom: "16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div>
+          <div style={{ fontSize: "17px", fontWeight: 800, color: "#fff", marginBottom: "3px" }}>Registro de Asistencia</div>
+          <div style={{ fontSize: "12.5px", color: "rgba(255,255,255,.6)" }}>Registra la asistencia de tus estudiantes por curso y fecha</div>
+        </div>
+        <div style={{ fontSize: "36px", opacity: 0.7 }}>📅</div>
       </div>
 
       {mensaje && (
@@ -76,7 +80,7 @@ const AsistenciaDocente = () => {
       )}
 
       {/* Selectores */}
-      <div style={{ background: "white", borderRadius: 12, padding: "1.5rem", marginBottom: "1.5rem", boxShadow: "0 2px 8px rgba(0,0,0,0.08)", border: "1px solid #e2e8f0", display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+      <div style={{ background: "white", borderRadius: "10px", padding: "1.25rem 1.5rem", marginBottom: "14px", border: "1px solid #dde3ec", display: "flex", gap: "1rem", flexWrap: "wrap" }}>
         <div style={{ flex: 1, minWidth: 200 }}>
           <label style={{ display: "block", fontWeight: 600, fontSize: "0.875rem", color: "#475569", marginBottom: "0.5rem" }}>Curso</label>
           <select value={cursoSeleccionado} onChange={(e) => setCursoSeleccionado(e.target.value)}
@@ -96,25 +100,27 @@ const AsistenciaDocente = () => {
       {cursoSeleccionado && estudiantes.length > 0 && (
         <>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "1rem", marginBottom: "1.5rem" }}>
-            {[{ label: "Total", value: estudiantes.length, color: "#667eea", icon: "👥" },
+            {[{ label: "Total", value: estudiantes.length, color: "#1e40af", icon: "👥" },
               { label: "Presentes", value: presentes, color: "#10b981", icon: "✅" },
               { label: "Ausentes", value: ausentes, color: "#ef4444", icon: "❌" }
             ].map((s, i) => (
-              <div key={i} style={{ background: "white", borderRadius: 12, padding: "1.25rem", boxShadow: "0 2px 8px rgba(0,0,0,0.08)", border: "1px solid #e2e8f0", textAlign: "center" }}>
-                <div style={{ fontSize: "2rem" }}>{s.icon}</div>
-                <div style={{ fontSize: "1.75rem", fontWeight: 700, color: s.color }}>{s.value}</div>
-                <div style={{ fontSize: "0.8rem", color: "#64748b", fontWeight: 600, textTransform: "uppercase" }}>{s.label}</div>
+              <div key={i} style={{ background: "white", borderRadius: "10px", padding: "15px 17px", border: "1px solid #dde3ec", borderLeft: `4px solid ${s.color}`, display: "flex", alignItems: "center", gap: "12px" }}>
+                <div style={{ width: "42px", height: "42px", borderRadius: "9px", background: s.color === "#1e40af" ? "#eff6ff" : s.color === "#10b981" ? "#f0fdf4" : "#fef2f2", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "18px", flexShrink: 0 }}>{s.icon}</div>
+                <div>
+                  <div style={{ fontSize: "24px", fontWeight: 800, color: "#0f2744", lineHeight: 1 }}>{s.value}</div>
+                  <div style={{ fontSize: "11px", color: "#6b7280", marginTop: "3px" }}>{s.label}</div>
+                </div>
               </div>
             ))}
           </div>
 
           {/* Lista */}
-          <div style={{ background: "white", borderRadius: 12, overflow: "hidden", boxShadow: "0 2px 8px rgba(0,0,0,0.08)", border: "1px solid #e2e8f0", marginBottom: "1.5rem" }}>
+          <div style={{ background: "white", borderRadius: "10px", overflow: "hidden", border: "1px solid #dde3ec", marginBottom: "14px" }}>
             {estudiantes.map((est, i) => (
               <div key={est.id_estudiante} onClick={() => toggle(est.id_estudiante)}
                 style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "1rem 1.5rem", borderBottom: i < estudiantes.length - 1 ? "1px solid #e2e8f0" : "none", cursor: "pointer", background: asistencias[est.id_estudiante] ? "#f0fdf4" : "#fff5f5", transition: "all 0.2s" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                  <div style={{ width: 40, height: 40, borderRadius: "50%", background: "linear-gradient(135deg,#667eea,#764ba2)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: "50%", background: "linear-gradient(135deg,#1e40af,#1e3a8a)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700 }}>
                     {(est.nombres || "?")[0]}
                   </div>
                   <div>
@@ -135,16 +141,16 @@ const AsistenciaDocente = () => {
           </div>
 
           <button onClick={handleGuardar} disabled={guardando}
-            style={{ padding: "0.875rem 2rem", background: "linear-gradient(135deg,#10b981,#059669)", color: "white", border: "none", borderRadius: 8, fontWeight: 700, fontSize: "1rem", cursor: "pointer" }}>
+            style={{ padding: "10px 24px", background: "linear-gradient(135deg,#0f2744,#1e40af)", color: "white", border: "none", borderRadius: "8px", fontWeight: 700, fontSize: "13px", cursor: "pointer" }}>
             {guardando ? "Guardando..." : "💾 Guardar Asistencia"}
           </button>
         </>
       )}
 
       {cursoSeleccionado && !loading && estudiantes.length === 0 && (
-        <div style={{ textAlign: "center", padding: "3rem", background: "white", borderRadius: 12, color: "#64748b" }}>
-          <span style={{ fontSize: "3rem" }}>👥</span>
-          <p style={{ fontWeight: 600 }}>No hay estudiantes inscritos en este curso</p>
+        <div style={{ textAlign: "center", padding: "3rem", background: "white", borderRadius: "10px", border: "1px solid #dde3ec", color: "#6b7280" }}>
+          <div style={{ fontSize: "3rem", marginBottom: "10px" }}>👥</div>
+          <div style={{ fontWeight: 700, color: "#0f2744" }}>No hay estudiantes inscritos en este curso</div>
         </div>
       )}
     </div>

@@ -5,6 +5,10 @@ export const ADMIN_ROUTES = {
   MATRICULAS: "/admin/matriculas",
   REPORTES: "/admin/reportes",
   CONFIGURACION: "/admin/configuracion",
+  NOTIFICACIONES: "/admin/notificaciones",
+  CALENDARIO: "/admin/calendario",
+  RENDIMIENTO: "/admin/rendimiento",
+  ALERTAS: "/admin/alertas",
 };
 
 export const DOCENTE_ROUTES = {
@@ -14,6 +18,9 @@ export const DOCENTE_ROUTES = {
   ASISTENCIA: "/docente/asistencia",
   CALIFICACIONES: "/docente/calificaciones",
   MATERIAL: "/docente/material",
+  CALENDARIO: "/docente/calendario",
+  NOTIFICACIONES: "/docente/notificaciones",
+  ACTIVIDADES: "/docente/actividades",
 };
 export const USUARIO_ROUTES = {
   DASHBOARD: "/usuario/dashboard",
@@ -23,4 +30,6 @@ export const USUARIO_ROUTES = {
   MATERIALES: "/usuario/materiales",
   HORARIO: "/usuario/horario",
   CALENDARIO: "/usuario/calendario",
+  NOTIFICACIONES: "/usuario/notificaciones",
+  ACTIVIDADES: "/usuario/actividades",
 };

@@ -1,10 +1,15 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
   server: {
     allowedHosts: ["adopt-club-commodities-avatar.trycloudflare.com"],
+  },
+  test: {
+    globals: true,
+    environment: "jsdom",
+    setupFilesAfterFramework: ["./src/tests/setup.js"],
+    css: false,
   },
 });

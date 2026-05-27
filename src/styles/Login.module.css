@@ -354,74 +354,95 @@
 /* ── Responsive ── */
 @media (max-width: 600px) {
   .loginContainer {
-    padding: 12px;
+    padding: 10px;
     align-items: flex-start;
-    padding-top: 24px;
+    overflow-y: auto;
   }
 
   .loginCard {
-    border-radius: 16px;
+    border-radius: 14px;
+    margin: 8px 0 16px;
   }
 
   .cardTop {
-    padding: 24px 20px 60px;
+    padding: 18px 16px 52px;
   }
 
   .title {
-    font-size: 24px;
+    font-size: 22px;
+  }
+
+  .subtitle {
+    font-size: 12px;
   }
 
   .logoWrapper {
-    margin-top: -52px;
-    margin-bottom: 12px;
+    margin-top: -46px;
+    margin-bottom: 8px;
   }
 
   .logoContainer {
-    width: 96px;
-    height: 96px;
-  }
-
-  .logoImage {
     width: 80px;
     height: 80px;
   }
 
+  .logoImage {
+    width: 66px;
+    height: 66px;
+  }
+
   .rolesBar {
-    padding: 10px 16px;
-    gap: 6px;
+    padding: 8px 14px;
+    gap: 5px;
   }
 
   .rolesLabel {
-    width: 100%;
-    margin-bottom: 2px;
+    font-size: 11px;
   }
 
   .roleChip {
     font-size: 11px;
-    padding: 4px 10px;
+    padding: 3px 9px;
   }
 
   .loginForm {
-    padding: 20px 16px 24px;
+    padding: 14px 16px 16px;
   }
 
-  .cardFooter {
-    padding: 12px 16px 18px;
+  .formTitle {
+    font-size: 16px;
+    margin-bottom: 14px;
+  }
+
+  .formGroup {
+    margin-bottom: 12px;
+  }
+
+  .input {
+    padding: 11px 14px 11px 42px;
+    font-size: 14px;
   }
 
   .buttonGroup {
     flex-direction: column;
-    gap: 8px;
+    gap: 7px;
+    margin-top: 16px;
   }
 
   .buttonPrimary,
   .buttonSecondary {
     width: 100%;
     flex: none;
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .cardFooter {
+    padding: 10px 16px 14px;
   }
 }
 
 @media (max-width: 380px) {
-  .title { font-size: 20px; }
-  .roleChip { font-size: 10px; padding: 3px 8px; }
+  .title { font-size: 19px; }
+  .roleChip { font-size: 10px; padding: 3px 7px; }
 }

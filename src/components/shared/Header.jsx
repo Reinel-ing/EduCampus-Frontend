@@ -1,9 +1,16 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import "../../styles/Header.css";
 
 const Header = ({ title = "Panel de Administración" }) => {
-  const { usuario } = useAuth();
+  const { usuario, cerrarSesion } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    cerrarSesion();
+    navigate("/login");
+  };
 
   return (
     <header className="app-header">
@@ -19,6 +26,9 @@ const Header = ({ title = "Panel de Administración" }) => {
             {usuario?.nombres || "Usuario"}
           </span>
         </div>
+        <button className="app-header-logout" onClick={handleLogout} title="Cerrar sesión">
+          🚪
+        </button>
       </div>
     </header>
   );

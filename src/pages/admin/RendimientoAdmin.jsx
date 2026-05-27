@@ -107,12 +107,13 @@ const RendimientoAdmin = () => {
           ) : estudiantes.length === 0 ? (
             <div style={styles.empty}>No hay datos de rendimiento aun.</div>
           ) : (
+            <div style={{ overflowX: "auto" }}>
             <table style={styles.table}>
               <thead>
                 <tr>
                   <th style={styles.th}>#</th>
                   <th style={styles.th}>Estudiante</th>
-                  <th style={styles.th}>Curso destacado</th>
+                  <th style={styles.th}>Curso</th>
                   <th style={styles.th}>Nota</th>
                   <th style={styles.th}>Asistencia</th>
                   <th style={styles.th}>Progreso</th>
@@ -142,6 +143,7 @@ const RendimientoAdmin = () => {
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </div>
       )}
@@ -157,6 +159,7 @@ const RendimientoAdmin = () => {
           ) : cursos.length === 0 ? (
             <div style={styles.empty}>No hay datos de cursos aun.</div>
           ) : (
+            <div style={{ overflowX: "auto" }}>
             <table style={styles.table}>
               <thead>
                 <tr>
@@ -188,6 +191,7 @@ const RendimientoAdmin = () => {
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </div>
       )}

@@ -161,7 +161,7 @@ const Horario = () => {
           </div>
         </div>
       ) : (
-        <div style={styles.diasGrid}>
+        <div className={dashStyles.statsRow3}>
           {diasConClases.map((dia, index) => {
             const color  = dayColors[index % dayColors.length];
             const clases = porDia[dia];

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { obtenerCursosPorDocente } from "../../services/cursoService";
+import dashStyles from "../../styles/Dashboards.module.css";
 import { obtenerEstudiantesCurso } from "../../services/cursoService";
 import { obtenerEstudiantePorId } from "../../services/estudianteService";
 import {
@@ -193,7 +194,7 @@ const Calificaciones = () => {
   }
 
   return (
-    <div style={{ padding:"22px 24px", background:"#f0f4f8", minHeight:"100%", boxSizing:"border-box" }}>
+    <div className={dashStyles.page}>
       {/* Banner institucional */}
       <div style={{ background:"linear-gradient(135deg,#0f2744 0%,#1e40af 100%)", borderRadius:"12px", padding:"18px 24px", marginBottom:"16px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
         <div>

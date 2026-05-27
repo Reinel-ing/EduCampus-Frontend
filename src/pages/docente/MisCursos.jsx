@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { obtenerCursosPorDocente } from "../../services/cursoService";
 import { useAuth } from "../../context/AuthContext";
 import { Curso } from "../../models/Curso";
+import dashStyles from "../../styles/Dashboards.module.css";
 import CursoCardDocente from "../../components/docente/CursoCardDocente";
 import CursoDetalles from "../../components/administrador/CursoDetalles";
 import styles from "../../styles/GestionCursos.module.css";
@@ -66,7 +67,7 @@ const MisCursos = () => {
   }
 
   return (
-    <div style={{ padding:"22px 24px", background:"#f0f4f8", minHeight:"100%", boxSizing:"border-box" }}>
+    <div className={dashStyles.page}>
       {/* Banner institucional */}
       <div style={{ background:"linear-gradient(135deg,#0f2744 0%,#1e40af 100%)", borderRadius:"12px", padding:"18px 24px", marginBottom:"16px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
         <div>

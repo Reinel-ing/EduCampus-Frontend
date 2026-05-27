@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import jsPDF     from "jspdf";
 import autoTable from "jspdf-autotable";
+import dashStyles from "../../styles/Dashboards.module.css";
 
 import { useAuth }                            from "../../context/AuthContext";
 import { obtenerCursosPorEstudiante }         from "../../services/cursoService";
@@ -130,7 +131,7 @@ const Calificaciones = () => {
   const promedioGeneral = calcularPromedioGeneral();
 
   return (
-    <div style={{ padding: "22px 24px", background: "#f0f4f8", minHeight: "100%", boxSizing: "border-box" }}>
+    <div className={dashStyles.page}>
 
       <BannerPage
         icono="📝"

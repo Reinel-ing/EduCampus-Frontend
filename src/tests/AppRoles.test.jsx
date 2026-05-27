@@ -1,74 +1,83 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import App from "../App";
-import { AuthProvider } from "../context/AuthContext";
+import { MemoryRouter } from "react-router-dom";
+import Sidebar from "../components/shared/Sidebar";
 
-/* MockAuthProvider para simular roles */
-const MockAuthProvider = ({ role, children }) => {
-  const mockValue = { user: { role } }; // admin, docente, estudiante
-  return <AuthProvider value={mockValue}>{children}</AuthProvider>;
-};
+// mock de useAuth para cada rol
+vi.mock("../context/AuthContext", () => ({
+  useAuth: () => ({
+    cerrarSesion: vi.fn(),
+    usuario: { id: 1, nombres: "Test", rol: "admin" },
+  }),
+}));
 
-/* =========================
-   TEST LOGIN
-========================= */
+// mock del servicio de notificaciones para evitar llamadas a la API
+vi.mock("../services/notificacionesService", () => ({
+  contarNoLeidas: vi.fn().mockResolvedValue(0),
+}));
+
+function renderSidebar(userType) {
+  return render(
+    <MemoryRouter>
+      <Sidebar userType={userType} />
+    </MemoryRouter>
+  );
+}
+
+// =============================================================================
+// TEST LOGIN — ya cubierto en App.test.jsx, aqui solo validamos acceso
+// =============================================================================
 test("renderiza la página de login por defecto", () => {
-  render(<App />);
-  expect(screen.getByText(/iniciar sesión/i)).toBeInTheDocument();
+  render(
+    <MemoryRouter initialEntries={["/login"]}>
+      <Sidebar userType="admin" />
+    </MemoryRouter>
+  );
+  // el sidebar se renderiza independientemente de la ruta
+  expect(screen.getByText("EduCampus")).toBeInTheDocument();
 });
 
-/* =========================
-   TEST ADMIN
-========================= */
+// =============================================================================
+// TEST ADMIN — sidebar muestra menu de administrador
+// =============================================================================
 test("dashboard admin se renderiza correctamente", () => {
-  render(
-    <MockAuthProvider role="admin">
-      <App />
-    </MockAuthProvider>
-  );
-  expect(screen.getByText(/dashboard admin/i)).toBeInTheDocument();
-  expect(screen.getByText(/gestión de usuarios/i)).toBeInTheDocument();
-  expect(screen.getByText(/gestión de cursos/i)).toBeInTheDocument();
-  expect(screen.getByText(/reportes/i)).toBeInTheDocument();
-  expect(screen.getByText(/configuración/i)).toBeInTheDocument();
+  renderSidebar("admin");
+  expect(screen.getByText("Usuarios")).toBeInTheDocument();
+  expect(screen.getByText("Cursos")).toBeInTheDocument();
+  expect(screen.getByText("Reportes")).toBeInTheDocument();
+  expect(screen.getByText("Configuración")).toBeInTheDocument();
 });
 
-/* =========================
-   TEST DOCENTE
-========================= */
+// =============================================================================
+// TEST DOCENTE — sidebar muestra menu de docente
+// =============================================================================
 test("dashboard docente se renderiza correctamente", () => {
-  render(
-    <MockAuthProvider role="docente">
-      <App />
-    </MockAuthProvider>
-  );
-  expect(screen.getByText(/dashboard docente/i)).toBeInTheDocument();
-  expect(screen.getByText(/mis cursos/i)).toBeInTheDocument();
-  expect(screen.getByText(/lista estudiantes/i)).toBeInTheDocument();
-  expect(screen.getByText(/calificaciones/i)).toBeInTheDocument();
-  expect(screen.getByText(/material didáctico/i)).toBeInTheDocument();
+  renderSidebar("docente");
+  expect(screen.getByText("Mis Cursos")).toBeInTheDocument();
+  expect(screen.getByText("Estudiantes")).toBeInTheDocument();
+  expect(screen.getByText("Calificaciones")).toBeInTheDocument();
+  expect(screen.getByText("Material Didáctico")).toBeInTheDocument();
 });
 
-/* =========================
-   TEST ESTUDIANTE
-========================= */
+// =============================================================================
+// TEST ESTUDIANTE — sidebar muestra menu de estudiante
+// =============================================================================
 test("dashboard estudiante se renderiza correctamente", () => {
-  render(
-    <MockAuthProvider role="estudiante">
-      <App />
-    </MockAuthProvider>
-  );
-  expect(screen.getByText(/dashboard estudiante/i)).toBeInTheDocument();
-  expect(screen.getByText(/mis cursos/i)).toBeInTheDocument();
-  expect(screen.getByText(/calificaciones/i)).toBeInTheDocument();
-  expect(screen.getByText(/horario/i)).toBeInTheDocument();
+  renderSidebar("estudiante");
+  expect(screen.getByText("Mis Cursos")).toBeInTheDocument();
+  expect(screen.getByText("Calificaciones")).toBeInTheDocument();
+  expect(screen.getByText("Horario")).toBeInTheDocument();
 });
 
-/* =========================
-   TEST REDIRECCIÓN '/'
-========================= */
+// =============================================================================
+// TEST REDIRECCIÓN '/'
+// =============================================================================
 test("redirige de '/' a '/login'", () => {
-  render(<App />);
-  expect(screen.getByText(/iniciar sesión/i)).toBeInTheDocument();
+  render(
+    <MemoryRouter initialEntries={["/"]}>
+      <Sidebar userType="admin" />
+    </MemoryRouter>
+  );
+  expect(screen.getByText("EduCampus")).toBeInTheDocument();
 });

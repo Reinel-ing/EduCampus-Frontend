@@ -256,7 +256,7 @@ const DashboardAdminPage = () => {
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: "12.5px", fontWeight: 600, color: "#374151" }}>{c.nombre}</div>
                   <div style={{ fontSize: "10.5px", color: "#9ca3af" }}>
-                    {c.horario || "Sin horario"} · Cupo: {c.cupo_maximo || "—"}
+                    {Array.isArray(c.horario) && c.horario.length > 0 ? c.horario.map(h => `${h.dia} ${h.hora}`).join(" · ") : "Sin horario"} · Cupo: {c.cupo_maximo || "—"}
                   </div>
                 </div>
                 <span style={styles.badge(c.estado ? "green" : "red")}>

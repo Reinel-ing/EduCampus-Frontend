@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import dashStyles from "../../styles/Dashboards.module.css";
 
 import { useAuth }                       from "../../context/AuthContext";
 import { obtenerAsistenciaPorEstudiante } from "../../services/asistenciaService";
@@ -165,7 +166,7 @@ const AsistenciaEstudiante = () => {
   }
 
   return (
-    <div style={styles.page}>
+    <div className={dashStyles.page}>
 
       <BannerPage
         icono="📅"
@@ -178,7 +179,7 @@ const AsistenciaEstudiante = () => {
       />
 
       {totalClases > 0 && (
-        <div style={styles.statsRow}>
+        <div className={dashStyles.statsRow3}>
           <div style={styles.statCard("#1e40af")}>
             <div style={styles.statIcon("#eff6ff")}>📊</div>
             <div>

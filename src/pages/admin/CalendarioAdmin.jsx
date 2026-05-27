@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import dashStyles from "../../styles/Dashboards.module.css";
 
 const styles = {
   page:  { padding: "22px 24px", background: "#f0f4f8", minHeight: "100%", boxSizing: "border-box" },
@@ -68,11 +69,11 @@ const CalendarioAdmin = () => {
   const [eventoSeleccionado, setEventoSeleccionado] = useState(null);
 
   return (
-    <div style={styles.page}>
+    <div className={dashStyles.page}>
       <div style={styles.title}>Calendario Académico</div>
       <div style={styles.sub}>Gestión de eventos y fechas importantes del período</div>
 
-      <div style={styles.grid}>
+      <div className={dashStyles.twoColSide}>
         <div style={styles.card}>
           <div style={styles.calNav}>
             <span style={styles.calMonth}>Mayo 2026</span>

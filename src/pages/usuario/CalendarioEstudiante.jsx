@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import dashStyles from "../../styles/Dashboards.module.css";
 
 import { useAuth }                  from "../../context/AuthContext";
 import { obtenerHorarioEstudiante } from "../../services/cursoService";
@@ -133,7 +134,7 @@ const CalendarioEstudiante = () => {
   );
 
   return (
-    <div style={styles.page}>
+    <div className={dashStyles.page}>
 
       <BannerPage
         icono="🗓️"
@@ -146,7 +147,7 @@ const CalendarioEstudiante = () => {
         extra={navMes}
       />
 
-      <div style={styles.twoCol}>
+      <div className={dashStyles.twoColSide}>
 
         <div style={styles.calCard}>
           <div style={styles.diasHeader}>

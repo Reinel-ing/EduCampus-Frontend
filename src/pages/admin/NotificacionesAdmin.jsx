@@ -1,3 +1,4 @@
+import dashStyles from "../../styles/Dashboards.module.css";
 import React, { useState, useEffect, useCallback } from "react";
 
 import { useAuth }    from "../../context/AuthContext";
@@ -241,7 +242,7 @@ export default function NotificacionesAdmin() {
   }
 
   return (
-    <div style={styles.page}>
+    <div className={dashStyles.page}>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
 
       <BannerPage

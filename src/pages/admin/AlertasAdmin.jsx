@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import dashStyles from "../../styles/Dashboards.module.css";
 import { ADMIN_ROUTES } from "../../constant/routes";
 
 const styles = {
@@ -69,11 +70,11 @@ const AlertasAdmin = () => {
   );
 
   return (
-    <div style={styles.page}>
+    <div className={dashStyles.page}>
       <div style={styles.title}>Alertas y Tareas Pendientes</div>
       <div style={styles.sub}>Revisa y gestiona todas las acciones pendientes del sistema</div>
 
-      <div style={styles.statsRow}>
+      <div className={dashStyles.statsRow3}>
         {[
           { label:"Urgentes",     value: alertas.filter(a=>a.tipo==="urgente").length,     icon:"🔴", color:"#dc2626" },
           { label:"Advertencias", value: alertas.filter(a=>a.tipo==="advertencia").length, icon:"🟡", color:"#d97706" },

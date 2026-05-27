@@ -1,3 +1,4 @@
+import dashStyles from "../../styles/Dashboards.module.css";
 import React, { useState, useEffect } from "react";
 
 import { useAuth }                    from "../../context/AuthContext";
@@ -152,7 +153,7 @@ const MaterialesEstudiante = () => {
   }
 
   return (
-    <div style={styles.page}>
+    <div className={dashStyles.page}>
 
       <BannerPage
         icono="📂"

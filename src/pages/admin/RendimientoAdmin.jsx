@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import dashStyles from "../../styles/Dashboards.module.css";
 const API = import.meta.env.VITE_API_BASE_URL;
 
 const styles = {
@@ -69,11 +70,11 @@ const RendimientoAdmin = () => {
   const { promedio_general, estudiantes, cursos } = data;
 
   return (
-    <div style={styles.page}>
+    <div className={dashStyles.page}>
       <div style={styles.title}>Rendimiento Academico</div>
       <div style={styles.sub}>Seguimiento del desempeno de estudiantes y cursos</div>
 
-      <div style={styles.statsRow}>
+      <div className={dashStyles.statsRow4}>
         {[
           { label:"Promedio general",    value: cargando ? "..." : promedio_general, icon:"📊", color:"#1e40af" },
           { label:"Estudiantes activos", value: cargando ? "..." : estudiantes.length, icon:"🎓", color:"#15803d" },

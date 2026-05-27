@@ -7,6 +7,7 @@ import { obtenerHorarioEstudiante, obtenerCursosPorEstudiante } from "../../serv
 import { obtenerCalificacionesPorEstudiante } from "../../services/calificacionService";
 import { USUARIO_ROUTES } from "../../constant/routes";
 import { gradientBanner, dayColors } from "../../theme";
+import dashStyles                    from "../../styles/Dashboards.module.css";
 
 const DIAS_SEMANA = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"];
 
@@ -174,7 +175,7 @@ const DashboardEstudiante = () => {
   });
 
   return (
-    <div style={styles.page}>
+    <div className={dashStyles.page}>
 
       <div style={styles.banner}>
         <div style={styles.bannerLeft}>
@@ -187,7 +188,7 @@ const DashboardEstudiante = () => {
         <div style={styles.bannerBadge}>🎓 Estudiante</div>
       </div>
 
-      <div style={styles.statsRow}>
+      <div className={dashStyles.statsRow4}>
         {statCards.map((s, i) => (
           <div key={i} style={styles.statCard(s.color)}>
             <div style={styles.statIcon(s.bg)}>{s.icon}</div>
@@ -199,7 +200,7 @@ const DashboardEstudiante = () => {
         ))}
       </div>
 
-      <div style={styles.threeCol}>
+      <div className={dashStyles.threeCol}>
 
         <div style={styles.card}>
           <div style={styles.cardTitle}>
@@ -299,7 +300,7 @@ const DashboardEstudiante = () => {
         </div>
       </div>
 
-      <div style={styles.twoCol}>
+      <div className={dashStyles.twoCol}>
 
         <div style={styles.card}>
           <div style={styles.cardTitle}>

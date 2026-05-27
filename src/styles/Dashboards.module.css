@@ -1,0 +1,74 @@
+/* Grids responsivos compartidos por los tres dashboards */
+
+.page {
+  padding: 22px 24px;
+  background: #f0f4f8;
+  min-height: 100%;
+  box-sizing: border-box;
+}
+
+.statsRow4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.statsRow3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.fourCol {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.threeCol {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.twoCol {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.twoColSide {
+  display: grid;
+  grid-template-columns: 1fr 240px;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+/* ── Tablet ────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .statsRow4 { grid-template-columns: repeat(2, 1fr); }
+  .fourCol   { grid-template-columns: repeat(2, 1fr); }
+  .twoColSide { grid-template-columns: 1fr; }
+}
+
+/* ── Móvil ─────────────────────────────────────── */
+@media (max-width: 768px) {
+  .page { padding: 14px 12px; }
+  .statsRow4  { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .statsRow3  { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .fourCol    { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .threeCol   { grid-template-columns: 1fr;            gap: 8px; }
+  .twoCol     { grid-template-columns: 1fr;            gap: 8px; }
+  .twoColSide { grid-template-columns: 1fr;            gap: 8px; }
+}
+
+@media (max-width: 400px) {
+  .statsRow4 { grid-template-columns: 1fr 1fr; }
+  .statsRow3 { grid-template-columns: 1fr 1fr; }
+  .fourCol   { grid-template-columns: 1fr 1fr; }
+}

@@ -6,6 +6,7 @@ import { getDocenteDashboardStats } from "../../services/dashboardService";
 import { obtenerHorarioDocente } from "../../services/cursoService";
 import { DOCENTE_ROUTES } from "../../constant/routes";
 import { gradientBanner, dayColors } from "../../theme";
+import dashStyles                    from "../../styles/Dashboards.module.css";
 
 const DIAS_SEMANA = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"];
 
@@ -112,7 +113,7 @@ const DashboardDocente = () => {
   const diasConClases = DIAS_SEMANA.filter((dia) => horarios.some((h) => h.dia === dia));
 
   return (
-    <div style={styles.page}>
+    <div className={dashStyles.page}>
 
       <div style={styles.banner}>
         <div style={styles.bannerLeft}>
@@ -125,7 +126,7 @@ const DashboardDocente = () => {
         <div style={styles.bannerBadge}>👨‍🏫 Docente</div>
       </div>
 
-      <div style={styles.statsRow}>
+      <div className={dashStyles.statsRow3}>
         {statCards.map((s, i) => (
           <div key={i} style={styles.statCard(s.color, s.bg)}>
             <div style={styles.statIcon(s.bg)}>{s.icon}</div>
@@ -137,7 +138,7 @@ const DashboardDocente = () => {
         ))}
       </div>
 
-      <div style={styles.twoCol}>
+      <div className={dashStyles.twoColSide}>
 
         <div style={styles.card}>
           <div style={styles.cardTitle}>

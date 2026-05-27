@@ -268,6 +268,32 @@
   }
 }
 
+/* ── Móvil ─────────────────────────────────────── */
+@media (max-width: 640px) {
+  .modalContent {
+    width: 96%;
+    max-height: 95vh;
+    border-radius: 0.75rem;
+  }
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+  .modalTitle {
+    font-size: 1.125rem;
+  }
+  .modalFooter {
+    flex-direction: column-reverse;
+    padding: 1rem;
+  }
+  .button {
+    width: 100%;
+    justify-content: center;
+  }
+  .modalBody {
+    padding: 1rem;
+  }
+}
+
 /* Scrollbar personalizado */
 .modalContent::-webkit-scrollbar {
   width: 8px;

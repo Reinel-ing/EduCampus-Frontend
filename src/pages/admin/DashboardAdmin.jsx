@@ -7,6 +7,7 @@ import { listarDocentes }         from "../../services/docenteService";
 import { listarEstudiantes }      from "../../services/estudianteService";
 import { ADMIN_ROUTES }           from "../../constant/routes";
 import { gradientBanner }         from "../../theme";
+import dashStyles                  from "../../styles/Dashboards.module.css";
 
 const styles = {
   page: { padding: "22px 24px", background: "#f0f4f8", minHeight: "100%", boxSizing: "border-box" },
@@ -194,7 +195,7 @@ const DashboardAdminPage = () => {
   const docentesVisible = docentes.slice(0, 5);
 
   return (
-    <div style={styles.page}>
+    <div className={dashStyles.page}>
 
       <div style={styles.banner}>
         <div>
@@ -204,7 +205,7 @@ const DashboardAdminPage = () => {
         <div style={styles.bannerIcon}>🏫</div>
       </div>
 
-      <div style={styles.statsRow}>
+      <div className={dashStyles.statsRow4}>
         {statCards.map((s, i) => (
           <div key={i} style={styles.statCard}>
             <div style={styles.statIconBox}>{s.icon}</div>
@@ -216,7 +217,7 @@ const DashboardAdminPage = () => {
         ))}
       </div>
 
-      <div style={styles.fourCol}>
+      <div className={dashStyles.fourCol}>
         {accesosRapidos.map((a, i) => (
           <button
             key={i}
@@ -236,7 +237,7 @@ const DashboardAdminPage = () => {
         ))}
       </div>
 
-      <div style={styles.threeCol}>
+      <div className={dashStyles.threeCol}>
 
         <div style={styles.card}>
           <div style={styles.cardTitle}>

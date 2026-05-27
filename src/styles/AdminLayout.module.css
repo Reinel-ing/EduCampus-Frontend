@@ -29,15 +29,14 @@
 @media (max-width: 768px) {
   .mainContent {
     margin-left: 0 !important;
-    padding-top: 4rem;
+    padding-top: 0;
   }
 
   .contentWrapper {
-    margin-bottom: 60px;
-    padding-bottom: 3rem;
+    padding-bottom: 2rem;
   }
 
   .mainContainer {
-    padding-bottom: 4rem;
+    padding-bottom: 2rem;
   }
 }

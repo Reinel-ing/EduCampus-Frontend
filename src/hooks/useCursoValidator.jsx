@@ -11,8 +11,9 @@ export function useCursoValidator() {
         "El nombre es obligatorio y debe tener al menos 3 caracteres.";
     }
 
-    if (!curso.cupo_estudiante || curso.cupo_estudiante < 1) {
-      newErrors.cupo_estudiante = "El cupo de estudiantes debe ser al menos 1.";
+    const cupo = Number(curso.cupo_estudiante);
+    if (!curso.cupo_estudiante || isNaN(cupo) || !Number.isInteger(cupo) || cupo < 1) {
+      newErrors.cupo_estudiante = "El cupo de estudiantes debe ser un numero entero de al menos 1.";
     }
 
     if (!curso.id_docente) {

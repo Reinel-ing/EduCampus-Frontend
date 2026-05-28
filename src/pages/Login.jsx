@@ -84,7 +84,7 @@ const Login = () => {
         </div>
 
         {/* Formulario */}
-        <form onSubmit={handleSubmit} className={styles.loginForm}>
+        <form onSubmit={handleSubmit} className={styles.loginForm} autoComplete="off">
           <h3 className={styles.formTitle}>Iniciar sesión</h3>
 
           {error && (
@@ -112,6 +112,7 @@ const Login = () => {
                 value={correo}
                 onChange={(e) => setCorreo(e.target.value)}
                 disabled={cargando}
+                autoComplete="off"
               />
             </div>
           </div>
@@ -133,6 +134,7 @@ const Login = () => {
                 value={contraseña}
                 onChange={(e) => setContraseña(e.target.value)}
                 disabled={cargando}
+                autoComplete="new-password"
               />
             </div>
           </div>

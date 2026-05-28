@@ -76,6 +76,13 @@ const GestionUsuarios = () => {
       placeholder: "Ej: Matemáticas",
     },
     {
+      name: "telefono",
+      label: "Teléfono",
+      type: "tel",
+      required: false,
+      placeholder: "Ej: 3001234567",
+    },
+    {
       name: "estado",
       label: "Estado Activo",
       type: "checkbox",
@@ -126,8 +133,8 @@ const GestionUsuarios = () => {
       name: "telefono",
       label: "Teléfono",
       type: "tel",
-      required: true,
-      placeholder: "Ej: 0991234567",
+      required: false,
+      placeholder: "Ej: 3001234567",
     },
     {
       name: "estado",

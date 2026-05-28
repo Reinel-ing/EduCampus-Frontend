@@ -56,7 +56,8 @@ const TablaDocentes = forwardRef(({ onEdit }, ref) => {
       docente.nombres.toLowerCase().includes(searchTerm.toLowerCase()) ||
       docente.apellidos.toLowerCase().includes(searchTerm.toLowerCase()) ||
       docente.cedula.includes(searchTerm) ||
-      docente.especialidad.toLowerCase().includes(searchTerm.toLowerCase())
+      docente.especialidad.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (docente.telefono && docente.telefono.includes(searchTerm))
   );
 
   if (loading) {
@@ -80,7 +81,7 @@ const TablaDocentes = forwardRef(({ onEdit }, ref) => {
       <div className={styles.searchContainer}>
         <input
           type="text"
-          placeholder="🔍 Buscar docente por nombre, apellidos, cédula o especialidad..."
+          placeholder="🔍 Buscar docente por nombre, apellidos, cédula, especialidad o teléfono..."
           className={styles.searchInput}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -96,6 +97,7 @@ const TablaDocentes = forwardRef(({ onEdit }, ref) => {
               <th>APELLIDOS</th>
               <th>CÉDULA</th>
               <th>ESPECIALIDAD</th>
+              <th>TELÉFONO</th>
               <th>ESTADO</th>
               <th>ACCIONES</th>
             </tr>
@@ -103,7 +105,7 @@ const TablaDocentes = forwardRef(({ onEdit }, ref) => {
           <tbody className={styles.tableBody}>
             {docentesFiltrados.length === 0 ? (
               <tr>
-                <td colSpan="7">
+                <td colSpan="8">
                   <div className={styles.emptyState}>
                     <p>No se encontraron docentes</p>
                     <small>Intenta con otros criterios de búsqueda</small>
@@ -118,6 +120,7 @@ const TablaDocentes = forwardRef(({ onEdit }, ref) => {
                   <td>{docente.apellidos}</td>
                   <td>{docente.cedula}</td>
                   <td>{docente.especialidad}</td>
+                  <td>{docente.telefono || <span style={{color:"#94a3b8"}}>—</span>}</td>
                   <td>
                     <span
                       className={`${styles.estadoBadge} ${

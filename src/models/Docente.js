@@ -5,6 +5,7 @@ export class Docente {
     cedula,
     correo,
     especialidad,
+    telefono,
     estado,
     id_docente,
   }) {
@@ -13,6 +14,7 @@ export class Docente {
     this.cedula = cedula;
     this.correo = correo;
     this.especialidad = especialidad;
+    this.telefono = telefono || null;
     this.estado = estado;
     this.id_docente = id_docente;
   }

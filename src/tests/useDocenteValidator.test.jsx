@@ -1,153 +1,128 @@
 import { renderHook, act } from "@testing-library/react";
 import { useDocenteValidator } from "../hooks/useDocenteValidator";
 
-const docenteValido = {
-  nombres:      "Carlos Perez",
-  apellidos:    "Rodriguez Lima",
-  cedula:       "123456",
-  correo:       "carlos@gmail.com",
-  contraseña:   "clave123",
+const valido = {
+  nombres: "Maria",
+  apellidos: "Lopez",
+  cedula: "7654321",
+  correo: "maria@gmail.com",
+  contraseña: "clave123",
   especialidad: "Matematicas",
-  estado:       true,
+  estado: true,
 };
 
-function runValidate(datos, esEdicion = false) {
-  const { result } = renderHook(() => useDocenteValidator());
-  let isValid;
-  act(() => { isValid = result.current.validate(datos, esEdicion); });
-  return { isValid, errors: result.current.errors };
-}
-
-// =============================================================================
-// CLASES DE EQUIVALENCIA — CAMPO: nombres
-// =============================================================================
-describe("CE — campo nombres", () => {
-  test("CE-01 | valido: nombre con 3 o mas caracteres", () => {
-    const { isValid } = runValidate(docenteValido);
-    expect(isValid).toBe(true);
+describe("useDocenteValidator — pruebas unitarias", () => {
+  test("UT-D01 | datos válidos retorna true", () => {
+    const { result } = renderHook(() => useDocenteValidator());
+    act(() => { expect(result.current.validate(valido)).toBe(true); });
   });
 
-  test("CE-02 | invalido: nombre con menos de 3 caracteres", () => {
-    const { isValid, errors } = runValidate({ ...docenteValido, nombres: "Ca" });
-    expect(isValid).toBe(false);
-    expect(errors.nombres).toBeDefined();
+  test("UT-D02 | nombre vacío genera error", () => {
+    const { result } = renderHook(() => useDocenteValidator());
+    act(() => { result.current.validate({ ...valido, nombres: "" }); });
+    expect(result.current.errors.nombres).toBeDefined();
   });
 
-  test("CE-03 | invalido: nombre vacio", () => {
-    const { isValid, errors } = runValidate({ ...docenteValido, nombres: "" });
-    expect(isValid).toBe(false);
-    expect(errors.nombres).toBeDefined();
-  });
-});
-
-// =============================================================================
-// CLASES DE EQUIVALENCIA — CAMPO: especialidad
-// =============================================================================
-describe("CE — campo especialidad", () => {
-  test("CE-04 | valido: especialidad con 3 o mas caracteres", () => {
-    const { isValid } = runValidate({ ...docenteValido, especialidad: "Arte" });
-    expect(isValid).toBe(true);
+  test("UT-D03 | nombre muy corto genera error", () => {
+    const { result } = renderHook(() => useDocenteValidator());
+    act(() => { result.current.validate({ ...valido, nombres: "Jo" }); });
+    expect(result.current.errors.nombres).toBeDefined();
   });
 
-  test("CE-05 | invalido: especialidad con menos de 3 caracteres", () => {
-    const { isValid, errors } = runValidate({ ...docenteValido, especialidad: "TI" });
-    expect(isValid).toBe(false);
-    expect(errors.especialidad).toBeDefined();
+  test("UT-D04 | apellido vacío genera error", () => {
+    const { result } = renderHook(() => useDocenteValidator());
+    act(() => { result.current.validate({ ...valido, apellidos: "" }); });
+    expect(result.current.errors.apellidos).toBeDefined();
   });
 
-  test("CE-06 | invalido: especialidad vacia", () => {
-    const { isValid, errors } = runValidate({ ...docenteValido, especialidad: "" });
-    expect(isValid).toBe(false);
-    expect(errors.especialidad).toBeDefined();
-  });
-});
-
-// =============================================================================
-// CLASES DE EQUIVALENCIA — CAMPO: correo
-// =============================================================================
-describe("CE — campo correo", () => {
-  test("CE-07 | valido: correo con formato correcto", () => {
-    const { isValid } = runValidate({ ...docenteValido, correo: "docente@outlook.com" });
-    expect(isValid).toBe(true);
+  test("UT-D05 | cédula muy corta genera error", () => {
+    const { result } = renderHook(() => useDocenteValidator());
+    act(() => { result.current.validate({ ...valido, cedula: "12" }); });
+    expect(result.current.errors.cedula).toBeDefined();
   });
 
-  test("CE-08 | invalido: correo sin dominio", () => {
-    const { isValid, errors } = runValidate({ ...docenteValido, correo: "docente@" });
-    expect(isValid).toBe(false);
-    expect(errors.correo).toBeDefined();
+  test("UT-D06 | correo inválido genera error", () => {
+    const { result } = renderHook(() => useDocenteValidator());
+    act(() => { result.current.validate({ ...valido, correo: "invalido" }); });
+    expect(result.current.errors.correo).toBeDefined();
   });
 
-  test("CE-09 | invalido: correo vacio", () => {
-    const { isValid, errors } = runValidate({ ...docenteValido, correo: "" });
-    expect(isValid).toBe(false);
-    expect(errors.correo).toBeDefined();
-  });
-});
-
-// =============================================================================
-// VALORES LIMITE — especialidad (limite: 3 caracteres)
-// =============================================================================
-describe("VL — campo especialidad (limite 3 chars)", () => {
-  test("VL-01 | 2 caracteres → invalido", () => {
-    const { isValid } = runValidate({ ...docenteValido, especialidad: "TI" });
-    expect(isValid).toBe(false);
+  test("UT-D07 | correo vacío genera error", () => {
+    const { result } = renderHook(() => useDocenteValidator());
+    act(() => { result.current.validate({ ...valido, correo: "" }); });
+    expect(result.current.errors.correo).toBeDefined();
   });
 
-  test("VL-02 | exactamente 3 caracteres → valido", () => {
-    const { isValid } = runValidate({ ...docenteValido, especialidad: "Bio" });
-    expect(isValid).toBe(true);
+  test("UT-D08 | contraseña vacía en creación genera error", () => {
+    const { result } = renderHook(() => useDocenteValidator());
+    act(() => { result.current.validate({ ...valido, contraseña: "" }); });
+    expect(result.current.errors.contraseña).toBeDefined();
   });
 
-  test("VL-03 | 4 caracteres → valido", () => {
-    const { isValid } = runValidate({ ...docenteValido, especialidad: "Arte" });
-    expect(isValid).toBe(true);
-  });
-});
-
-// =============================================================================
-// VALORES LIMITE — cedula (limite: 6 caracteres)
-// =============================================================================
-describe("VL — campo cedula (limite 6 chars)", () => {
-  test("VL-04 | 5 caracteres → invalido", () => {
-    const { isValid } = runValidate({ ...docenteValido, cedula: "12345" });
-    expect(isValid).toBe(false);
+  test("UT-D09 | contraseña corta en creación genera error", () => {
+    const { result } = renderHook(() => useDocenteValidator());
+    act(() => { result.current.validate({ ...valido, contraseña: "abc" }); });
+    expect(result.current.errors.contraseña).toBeDefined();
   });
 
-  test("VL-05 | exactamente 6 caracteres → valido", () => {
-    const { isValid } = runValidate({ ...docenteValido, cedula: "123456" });
-    expect(isValid).toBe(true);
+  test("UT-D10 | en edición contraseña vacía no genera error", () => {
+    const { result } = renderHook(() => useDocenteValidator());
+    let ok;
+    act(() => { ok = result.current.validate({ ...valido, contraseña: "" }, true); });
+    expect(result.current.errors.contraseña).toBeUndefined();
+    expect(ok).toBe(true);
   });
 
-  test("VL-06 | 10 caracteres → valido", () => {
-    const { isValid } = runValidate({ ...docenteValido, cedula: "1234567890" });
-    expect(isValid).toBe(true);
-  });
-});
-
-// =============================================================================
-// CAMINO BASICO — flujo del metodo validate()
-// =============================================================================
-describe("CB — camino basico del validate()", () => {
-  test("CB-01 | camino feliz: todos los campos validos → retorna true", () => {
-    const { isValid, errors } = runValidate(docenteValido);
-    expect(isValid).toBe(true);
-    expect(Object.keys(errors)).toHaveLength(0);
+  test("UT-D11 | en edición contraseña corta genera error", () => {
+    const { result } = renderHook(() => useDocenteValidator());
+    act(() => { result.current.validate({ ...valido, contraseña: "12" }, true); });
+    expect(result.current.errors.contraseña).toBeDefined();
   });
 
-  test("CB-02 | todos los campos invalidos → multiples errores", () => {
-    const { isValid, errors } = runValidate({ nombres: "", apellidos: "", cedula: "", correo: "", contraseña: "", especialidad: "", estado: null });
-    expect(isValid).toBe(false);
-    expect(Object.keys(errors).length).toBeGreaterThan(3);
+  test("UT-D12 | especialidad vacía genera error", () => {
+    const { result } = renderHook(() => useDocenteValidator());
+    act(() => { result.current.validate({ ...valido, especialidad: "" }); });
+    expect(result.current.errors.especialidad).toBeDefined();
   });
 
-  test("CB-03 | modo edicion sin contraseña → no valida contraseña", () => {
-    const { isValid } = runValidate({ ...docenteValido, contraseña: "" }, true);
-    expect(isValid).toBe(true);
+  test("UT-D13 | especialidad muy corta genera error", () => {
+    const { result } = renderHook(() => useDocenteValidator());
+    act(() => { result.current.validate({ ...valido, especialidad: "IT" }); });
+    expect(result.current.errors.especialidad).toBeDefined();
   });
 
-  test("CB-04 | estado no booleano → genera error de estado", () => {
-    const { isValid, errors } = runValidate({ ...docenteValido, estado: "activo" });
-    expect(isValid).toBe(false);
-    expect(errors.estado).toBeDefined();
+  test("UT-D14 | estado no booleano genera error", () => {
+    const { result } = renderHook(() => useDocenteValidator());
+    act(() => { result.current.validate({ ...valido, estado: "si" }); });
+    expect(result.current.errors.estado).toBeDefined();
+  });
+
+  test("UT-D15 | estado false es válido", () => {
+    const { result } = renderHook(() => useDocenteValidator());
+    act(() => { expect(result.current.validate({ ...valido, estado: false })).toBe(true); });
+  });
+
+  test("UT-D16 | múltiples errores a la vez", () => {
+    const { result } = renderHook(() => useDocenteValidator());
+    act(() => { result.current.validate({ nombres: "", apellidos: "", cedula: "", correo: "", contraseña: "", especialidad: "", estado: null }); });
+    expect(Object.keys(result.current.errors).length).toBeGreaterThan(3);
+  });
+
+  test("UT-D17 | retorna false con datos inválidos", () => {
+    const { result } = renderHook(() => useDocenteValidator());
+    act(() => { expect(result.current.validate({ ...valido, nombres: "" })).toBe(false); });
+  });
+
+  test("UT-D18 | errores se limpian tras validación exitosa", () => {
+    const { result } = renderHook(() => useDocenteValidator());
+    act(() => { result.current.validate({ ...valido, especialidad: "" }); });
+    expect(result.current.errors.especialidad).toBeDefined();
+    act(() => { result.current.validate(valido); });
+    expect(result.current.errors.especialidad).toBeUndefined();
+  });
+
+  test("UT-D19 | correo con formato correcto es aceptado", () => {
+    const { result } = renderHook(() => useDocenteValidator());
+    act(() => { expect(result.current.validate({ ...valido, correo: "docente@hotmail.com" })).toBe(true); });
   });
 });

@@ -1,83 +1,66 @@
-/**
- * sis_portabilidad.test.jsx
- * Pruebas de sistema — Portabilidad.
- * Verifica que los componentes se renderizan en distintos contextos y roles.
- * Tecnica: Clases de Equivalencia (CE), Valores Limite (VL).
- */
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import "@testing-library/jest-dom";
 import { MemoryRouter } from "react-router-dom";
-import Login from "../pages/Login";
-import Sidebar from "../components/shared/Sidebar";
-import EstadoBadge from "../components/estudiante/EstadoBadge";
 
-vi.mock("../context/AuthContext", () => ({
+jest.mock("../context/AuthContext", () => ({
   useAuth: () => ({
-    iniciarSesion: vi.fn(),
-    cerrarSesion:  vi.fn(),
-    usuario: { id: 1, nombres: "Prueba", rol: "admin" },
+    iniciarSesion: jest.fn(),
+    isAuthenticated: false,
+    loading: false,
   }),
 }));
 
-vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual("react-router-dom");
-  return { ...actual, useNavigate: () => vi.fn() };
-});
+import Login from "../pages/Login";
 
-vi.mock("../services/notificacionesService", () => ({
-  contarNoLeidas: vi.fn().mockResolvedValue(0),
-}));
+const renderLogin = () =>
+  render(<MemoryRouter><Login /></MemoryRouter>);
 
-// === CE — Portabilidad del componente Login en cualquier entorno ===
-describe("SIS-PORT | Login portable en cualquier entorno", () => {
-
-  test("SIS-01 | Login se renderiza sin errores en entorno jsdom", () => {
-    expect(() =>
-      render(<MemoryRouter><Login /></MemoryRouter>)
-    ).not.toThrow();
+describe("SIS — Pruebas de Portabilidad", () => {
+  test("SIS-P01 | el componente Login renderiza sin errores", () => {
+    expect(() => renderLogin()).not.toThrow();
   });
 
-  test("SIS-02 | Login muestra el titulo EduCampus como encabezado principal", () => {
-    render(<MemoryRouter><Login /></MemoryRouter>);
-    expect(screen.getByText("EduCampus")).toBeInTheDocument();
-  });
-});
-
-// === CE — Portabilidad del componente Sidebar con cualquier rol ===
-describe("SIS-PORT | Sidebar portable para todos los roles", () => {
-
-  test("SIS-03 | Sidebar con rol admin se renderiza sin errores", () => {
-    expect(() =>
-      render(<MemoryRouter><Sidebar userType="admin" /></MemoryRouter>)
-    ).not.toThrow();
+  test("SIS-P02 | el formulario existe en el DOM", () => {
+    renderLogin();
+    expect(document.querySelector("form")).toBeInTheDocument();
   });
 
-  test("SIS-04 | Sidebar con rol docente se renderiza sin errores", () => {
-    expect(() =>
-      render(<MemoryRouter><Sidebar userType="docente" /></MemoryRouter>)
-    ).not.toThrow();
+  test("SIS-P03 | los inputs son accesibles por rol", () => {
+    renderLogin();
+    const inputs = screen.getAllByRole("textbox");
+    expect(inputs.length).toBeGreaterThanOrEqual(1);
   });
 
-  test("SIS-05 | Sidebar con rol estudiante se renderiza sin errores", () => {
-    expect(() =>
-      render(<MemoryRouter><Sidebar userType="estudiante" /></MemoryRouter>)
-    ).not.toThrow();
-  });
-});
-
-// === VL — Portabilidad de EstadoBadge con valores limite ===
-describe("SIS-PORT | EstadoBadge portable con todos sus tipos", () => {
-
-  test("SIS-06 | EstadoBadge tipo='aprobado' se renderiza sin errores", () => {
-    expect(() => render(<EstadoBadge tipo="aprobado" />)).not.toThrow();
+  test("SIS-P04 | los botones son accesibles por rol", () => {
+    renderLogin();
+    const buttons = screen.getAllByRole("button");
+    expect(buttons.length).toBeGreaterThanOrEqual(2);
   });
 
-  test("SIS-07 | EstadoBadge tipo='nota' con nota=3.0 se renderiza sin errores", () => {
-    expect(() => render(<EstadoBadge tipo="nota" nota={3.0} />)).not.toThrow();
+  test("SIS-P05 | la imagen del logo tiene atributo alt", () => {
+    renderLogin();
+    const img = screen.getByAltText(/educampus logo/i);
+    expect(img).toBeInTheDocument();
   });
 
-  test("SIS-08 | EstadoBadge con tipo desconocido no lanza excepcion", () => {
-    expect(() => render(<EstadoBadge tipo="invalido" />)).not.toThrow();
+  test("SIS-P06 | el título principal está en el documento", () => {
+    renderLogin();
+    expect(screen.getAllByRole("heading").length).toBeGreaterThan(0);
+  });
+
+  test("SIS-P07 | el componente no genera advertencias de PropTypes", () => {
+    const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    renderLogin();
+    const propTypeErrors = consoleSpy.mock.calls.filter(call =>
+      call[0] && call[0].includes && call[0].includes("propTypes")
+    );
+    expect(propTypeErrors.length).toBe(0);
+    consoleSpy.mockRestore();
+  });
+
+  test("SIS-P08 | el formulario tiene atributo autocomplete desactivado", () => {
+    renderLogin();
+    const form = document.querySelector("form");
+    expect(form).toHaveAttribute("autocomplete", "off");
   });
 });

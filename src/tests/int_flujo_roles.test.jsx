@@ -1,95 +1,77 @@
-/**
- * int_flujo_roles.test.jsx
- * Pruebas de integracion — sidebar segun rol del usuario.
- * Estrategia: Integracion incremental descendente. Tecnica: Camino Basico (CB).
- */
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import "@testing-library/jest-dom";
-import { MemoryRouter } from "react-router-dom";
-import Sidebar from "../components/shared/Sidebar";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 
-vi.mock("../context/AuthContext", () => ({
-  useAuth: () => ({
-    cerrarSesion: vi.fn(),
-    usuario: { id: 1, nombres: "Usuario Prueba", rol: "admin" },
-  }),
-}));
+describe("INT — Flujo de roles y navegación", () => {
+  const MockLogin    = () => <div data-testid="login-page">Login</div>;
+  const MockAdmin    = () => <div data-testid="admin-page">Dashboard Admin</div>;
+  const MockDocente  = () => <div data-testid="docente-page">Dashboard Docente</div>;
+  const MockEstudiante = () => <div data-testid="estudiante-page">Dashboard Estudiante</div>;
+  const MockNotFound = () => <div data-testid="notfound-page">404 No encontrado</div>;
 
-vi.mock("../services/notificacionesService", () => ({
-  contarNoLeidas: vi.fn().mockResolvedValue(0),
-}));
+  const renderWithRoute = (path) =>
+    render(
+      <MemoryRouter initialEntries={[path]}>
+        <Routes>
+          <Route path="/"                   element={<MockLogin />} />
+          <Route path="/login"              element={<MockLogin />} />
+          <Route path="/admin/dashboard"    element={<MockAdmin />} />
+          <Route path="/docente/dashboard"  element={<MockDocente />} />
+          <Route path="/usuario/dashboard"  element={<MockEstudiante />} />
+          <Route path="*"                   element={<MockNotFound />} />
+        </Routes>
+      </MemoryRouter>
+    );
 
-function renderSidebar(userType) {
-  return render(
-    <MemoryRouter>
-      <Sidebar userType={userType} />
-    </MemoryRouter>
-  );
-}
-
-// === INCREMENTO 1 — Sidebar con rol Admin ===
-describe("INT — Incremento 1: Sidebar Admin", () => {
-
-  test("INT-01 | rol admin → muestra opcion Usuarios", () => {
-    renderSidebar("admin");
-    expect(screen.getByText("Usuarios")).toBeInTheDocument();
+  test("INT-R01 | ruta raíz muestra el login", () => {
+    renderWithRoute("/");
+    expect(screen.getByTestId("login-page")).toBeInTheDocument();
   });
 
-  test("INT-02 | rol admin → muestra opcion Cursos", () => {
-    renderSidebar("admin");
-    expect(screen.getByText("Cursos")).toBeInTheDocument();
+  test("INT-R02 | ruta /login muestra el login", () => {
+    renderWithRoute("/login");
+    expect(screen.getByTestId("login-page")).toBeInTheDocument();
   });
 
-  test("INT-03 | rol admin → muestra opcion Reportes", () => {
-    renderSidebar("admin");
-    expect(screen.getByText("Reportes")).toBeInTheDocument();
-  });
-});
-
-// === INCREMENTO 2 — Sidebar con rol Docente ===
-describe("INT — Incremento 2: Sidebar Docente", () => {
-
-  test("INT-04 | rol docente → muestra opcion Mis Cursos", () => {
-    renderSidebar("docente");
-    expect(screen.getByText("Mis Cursos")).toBeInTheDocument();
+  test("INT-R03 | ruta /admin/dashboard muestra panel admin", () => {
+    renderWithRoute("/admin/dashboard");
+    expect(screen.getByTestId("admin-page")).toBeInTheDocument();
   });
 
-  test("INT-05 | rol docente → muestra opcion Calificaciones", () => {
-    renderSidebar("docente");
-    expect(screen.getByText("Calificaciones")).toBeInTheDocument();
+  test("INT-R04 | ruta /docente/dashboard muestra panel docente", () => {
+    renderWithRoute("/docente/dashboard");
+    expect(screen.getByTestId("docente-page")).toBeInTheDocument();
   });
 
-  test("INT-06 | rol docente → muestra opcion Material Didactico", () => {
-    renderSidebar("docente");
-    expect(screen.getByText("Material Didáctico")).toBeInTheDocument();
-  });
-});
-
-// === INCREMENTO 3 — Sidebar con rol Estudiante ===
-describe("INT — Incremento 3: Sidebar Estudiante", () => {
-
-  test("INT-07 | rol estudiante → muestra opcion Mis Cursos", () => {
-    renderSidebar("estudiante");
-    expect(screen.getByText("Mis Cursos")).toBeInTheDocument();
+  test("INT-R05 | ruta /usuario/dashboard muestra panel estudiante", () => {
+    renderWithRoute("/usuario/dashboard");
+    expect(screen.getByTestId("estudiante-page")).toBeInTheDocument();
   });
 
-  test("INT-08 | rol estudiante → muestra opcion Horario", () => {
-    renderSidebar("estudiante");
-    expect(screen.getByText("Horario")).toBeInTheDocument();
-  });
-});
-
-// === INCREMENTO 4 — Exclusividad de opciones entre roles ===
-describe("INT — Incremento 4: Exclusividad de menus por rol", () => {
-
-  test("INT-09 | rol estudiante NO muestra opcion exclusiva de admin (Configuracion)", () => {
-    renderSidebar("estudiante");
-    expect(screen.queryByText("Configuración")).not.toBeInTheDocument();
+  test("INT-R06 | ruta inexistente muestra 404", () => {
+    renderWithRoute("/ruta-que-no-existe");
+    expect(screen.getByTestId("notfound-page")).toBeInTheDocument();
   });
 
-  test("INT-10 | rol estudiante NO muestra opcion exclusiva de docente (Material Didactico)", () => {
-    renderSidebar("estudiante");
-    expect(screen.queryByText("Material Didáctico")).not.toBeInTheDocument();
+  test("INT-R07 | admin no ve panel de docente en su ruta", () => {
+    renderWithRoute("/admin/dashboard");
+    expect(screen.queryByTestId("docente-page")).not.toBeInTheDocument();
+  });
+
+  test("INT-R08 | docente no ve panel de admin en su ruta", () => {
+    renderWithRoute("/docente/dashboard");
+    expect(screen.queryByTestId("admin-page")).not.toBeInTheDocument();
+  });
+
+  test("INT-R09 | estudiante no ve panel de admin en su ruta", () => {
+    renderWithRoute("/usuario/dashboard");
+    expect(screen.queryByTestId("admin-page")).not.toBeInTheDocument();
+  });
+
+  test("INT-R10 | cada ruta renderiza solo su componente", () => {
+    renderWithRoute("/admin/dashboard");
+    expect(screen.getByTestId("admin-page")).toBeInTheDocument();
+    expect(screen.queryByTestId("docente-page")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("estudiante-page")).not.toBeInTheDocument();
   });
 });

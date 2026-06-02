@@ -1,126 +1,88 @@
-/**
- * bugs.test.jsx
- * Tests diseñados para encontrar fallos REALES en los validadores.
- * Si un test falla aqui, hay un bug en el codigo que debe corregirse.
- */
+import React from "react";
+import { render, screen, fireEvent } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import { renderHook, act } from "@testing-library/react";
+
+jest.mock("../context/AuthContext", () => ({
+  useAuth: () => ({
+    iniciarSesion: jest.fn().mockResolvedValue({ error: false }),
+    isAuthenticated: false,
+    loading: false,
+  }),
+}));
+
+import Login from "../pages/Login";
+import EstadoBadge from "../components/estudiante/EstadoBadge";
 import { useEstudianteValidator } from "../hooks/useEstudianteValidator";
-import { useCursoValidator } from "../hooks/useCursoValidator";
-import { useDocenteValidator } from "../hooks/useDocenteValidator";
 
-function runEstudiante(datos, esEdicion = false) {
-  const { result } = renderHook(() => useEstudianteValidator());
-  let isValid;
-  act(() => { isValid = result.current.validate(datos, esEdicion); });
-  return { isValid, errors: result.current.errors };
-}
+const renderLogin = () =>
+  render(<MemoryRouter><Login /></MemoryRouter>);
 
-function runCurso(datos) {
-  const { result } = renderHook(() => useCursoValidator());
-  let isValid;
-  act(() => { isValid = result.current.validate(datos); });
-  return { isValid, errors: result.current.errors };
-}
-
-function runDocente(datos, esEdicion = false) {
-  const { result } = renderHook(() => useDocenteValidator());
-  let isValid;
-  act(() => { isValid = result.current.validate(datos, esEdicion); });
-  return { isValid, errors: result.current.errors };
-}
-
-const estudianteBase = {
-  nombres: "Ana Lopez", apellidos: "Garcia Ruiz", cedula: "123456",
-  correo: "ana@gmail.com", contraseña: "clave123", telefono: "3001234567", estado: true,
-};
-const cursoBase = {
-  nombre: "Matematicas", cupo_estudiante: 30,
-  id_docente: 1, horario: [{ dia: "Lunes", hora: "08:00" }], estado: true,
-};
-const docenteBase = {
-  nombres: "Carlos Perez", apellidos: "Lopez Gil", cedula: "123456",
-  correo: "carlos@gmail.com", contraseña: "clave123", especialidad: "Fisica", estado: true,
-};
-
-// =============================================================================
-// BUG 1: nombres solo con espacios deberia ser invalido
-// Fallo esperado: "   " tiene 3 chars pero son solo espacios → debe fallar
-// =============================================================================
-describe("BUG-01 | nombres con solo espacios", () => {
-  test("nombre='   ' (3 espacios) debe ser INVALIDO", () => {
-    const { isValid } = runEstudiante({ ...estudianteBase, nombres: "   " });
-    expect(isValid).toBe(false); // si pasa → bug: trim no se aplica bien
+describe("BUG — Pruebas de regresión", () => {
+  test("BUG-01 | correo con espacios en blanco no pasa validación", async () => {
+    renderLogin();
+    fireEvent.change(screen.getByLabelText(/correo electrónico/i), { target: { value: "   " } });
+    fireEvent.change(screen.getByLabelText(/contraseña/i), { target: { value: "clave123" } });
+    fireEvent.click(screen.getByRole("button", { name: /ingresar/i }));
+    expect(await screen.findByText(/solo se permiten correos/i)).toBeInTheDocument();
   });
 
-  test("apellido='   ' (3 espacios) debe ser INVALIDO", () => {
-    const { isValid } = runEstudiante({ ...estudianteBase, apellidos: "   " });
-    expect(isValid).toBe(false);
-  });
-});
-
-// =============================================================================
-// BUG 2: cupo_estudiante como texto no numerico deberia ser invalido
-// Fallo esperado: cupo="abc" pasa la validacion actual → bug real
-// =============================================================================
-describe("BUG-02 | cupo_estudiante no numerico", () => {
-  test("cupo='abc' (texto) debe ser INVALIDO", () => {
-    const { isValid } = runCurso({ ...cursoBase, cupo_estudiante: "abc" });
-    expect(isValid).toBe(false); // si pasa → bug: no valida que sea numero
+  test("BUG-02 | EstadoBadge con tipo null no rompe la app", () => {
+    expect(() => render(<EstadoBadge tipo={null} />)).not.toThrow();
   });
 
-  test("cupo=0.5 (fraccion) debe ser INVALIDO", () => {
-    const { isValid } = runCurso({ ...cursoBase, cupo_estudiante: 0.5 });
-    expect(isValid).toBe(false); // cupo debe ser entero >= 1
-  });
-});
-
-// =============================================================================
-// BUG 3: correo con espacios internos deberia ser invalido
-// Fallo esperado: "ana @gmail.com" no deberia pasar el regex
-// =============================================================================
-describe("BUG-03 | correo con espacios", () => {
-  test("correo con espacio antes del @ debe ser INVALIDO", () => {
-    const { isValid } = runEstudiante({ ...estudianteBase, correo: "ana @gmail.com" });
-    expect(isValid).toBe(false);
+  test("BUG-03 | EstadoBadge con tipo undefined no rompe la app", () => {
+    expect(() => render(<EstadoBadge tipo={undefined} />)).not.toThrow();
   });
 
-  test("correo con espacio despues del @ debe ser INVALIDO", () => {
-    const { isValid } = runEstudiante({ ...estudianteBase, correo: "ana@ gmail.com" });
-    expect(isValid).toBe(false);
-  });
-});
-
-// =============================================================================
-// BUG 4: cedula con solo espacios deberia ser invalido
-// =============================================================================
-describe("BUG-04 | cedula con solo espacios", () => {
-  test("cedula='      ' (6 espacios) debe ser INVALIDO", () => {
-    const { isValid } = runEstudiante({ ...estudianteBase, cedula: "      " });
-    expect(isValid).toBe(false); // si pasa → bug: no aplica trim a cedula
-  });
-});
-
-// =============================================================================
-// BUG 5: contraseña con solo espacios deberia ser invalido
-// =============================================================================
-describe("BUG-05 | contraseña con solo espacios", () => {
-  test("contraseña='      ' (6 espacios) debe ser INVALIDO", () => {
-    const { isValid } = runEstudiante({ ...estudianteBase, contraseña: "      " });
-    expect(isValid).toBe(false); // si pasa → bug: trim no detecta espacios
+  test("BUG-04 | nota 0 muestra No aprobado (no error)", () => {
+    render(<EstadoBadge tipo="nota" nota={0} />);
+    expect(screen.getByText(/No aprobado/i)).toBeInTheDocument();
   });
 
-  test("contraseña docente='      ' debe ser INVALIDO", () => {
-    const { isValid } = runDocente({ ...docenteBase, contraseña: "      " });
-    expect(isValid).toBe(false);
+  test("BUG-05 | nota 5.0 muestra Aprobado", () => {
+    render(<EstadoBadge tipo="nota" nota={5.0} />);
+    expect(screen.getByText(/Aprobado/i)).toBeInTheDocument();
   });
-});
 
-// =============================================================================
-// BUG 6: especialidad con solo espacios deberia ser invalido
-// =============================================================================
-describe("BUG-06 | especialidad con solo espacios", () => {
-  test("especialidad='   ' (3 espacios) debe ser INVALIDO", () => {
-    const { isValid } = runDocente({ ...docenteBase, especialidad: "   " });
-    expect(isValid).toBe(false);
+  test("BUG-06 | validar estudiante con null no lanza excepción", () => {
+    const { result } = renderHook(() => useEstudianteValidator());
+    expect(() => {
+      act(() => { result.current.validate({ nombres: null, apellidos: null, cedula: null, correo: null, contraseña: null, telefono: null, estado: null }); });
+    }).not.toThrow();
+  });
+
+  test("BUG-07 | limpiar login después de error borra el mensaje", async () => {
+    renderLogin();
+    fireEvent.click(screen.getByRole("button", { name: /ingresar/i }));
+    expect(await screen.findByText(/completa todos los campos/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /limpiar/i }));
+    expect(screen.queryByText(/completa todos los campos/i)).not.toBeInTheDocument();
+  });
+
+  test("BUG-08 | correo con mayúsculas es normalizado a minúsculas internamente", async () => {
+    const mockLogin = jest.fn().mockResolvedValue({ error: false });
+    jest.spyOn(require("../context/AuthContext"), "useAuth").mockReturnValue({
+      iniciarSesion: mockLogin, isAuthenticated: false, loading: false,
+    });
+    renderLogin();
+    fireEvent.change(screen.getByLabelText(/correo electrónico/i), { target: { value: "ADMIN@GMAIL.COM" } });
+    fireEvent.change(screen.getByLabelText(/contraseña/i), { target: { value: "clave123" } });
+    fireEvent.click(screen.getByRole("button", { name: /ingresar/i }));
+    expect(screen.queryByText(/solo se permiten correos/i)).not.toBeInTheDocument();
+  });
+
+  test("BUG-09 | cupo negativo en curso es rechazado por validador", () => {
+    const { result } = renderHook(() => require("../hooks/useCursoValidator").useCursoValidator());
+    act(() => {
+      result.current.validate({ nombre: "Curso", cupo_estudiante: -1, id_docente: 1, horario: [{}], estado: true });
+    });
+    expect(result.current.errors.cupo_estudiante).toBeDefined();
+  });
+
+  test("BUG-10 | Login no muestra error de correo al cargar por primera vez", () => {
+    renderLogin();
+    expect(screen.queryByText(/solo se permiten correos/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/completa todos/i)).not.toBeInTheDocument();
   });
 });

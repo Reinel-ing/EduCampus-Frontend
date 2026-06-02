@@ -6,10 +6,4 @@ export default defineConfig({
   server: {
     allowedHosts: ["adopt-club-commodities-avatar.trycloudflare.com"],
   },
-  test: {
-    globals: true,
-    environment: "jsdom",
-    setupFilesAfterFramework: ["./src/tests/setup.js"],
-    css: false,
-  },
 });

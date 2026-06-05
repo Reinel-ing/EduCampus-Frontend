@@ -74,14 +74,18 @@ function processJest(data) {
   if (!data) return { suites: [], total: 0, passed: 0, failed: 0, duration: 0 };
 
   const suites = (data.testResults || []).map(suite => {
-    const file = suite.testFilePath
-      ? suite.testFilePath.replace(/.*[\\/]tests[\\/]/, "").replace(/\\/g, "/")
+    // Jest usa "name" para la ruta del archivo
+    const file = suite.name
+      ? suite.name.replace(/.*[\\/]tests[\\/]/, "").replace(/\\/g, "/")
       : "Unknown";
-    const tests = (suite.testResults || []).map(t => ({
+
+    // Los tests están en assertionResults
+    const tests = (suite.assertionResults || []).map(t => ({
       name: t.fullName || t.title || "Test",
       status: t.status === "passed" ? "pass" : "fail",
       duration: Math.round(t.duration || 0),
     }));
+
     const passed = tests.filter(t => t.status === "pass").length;
     const failed = tests.filter(t => t.status === "fail").length;
     return { file, tests, passed, failed };
@@ -92,7 +96,7 @@ function processJest(data) {
     total: data.numTotalTests || 0,
     passed: data.numPassedTests || 0,
     failed: data.numFailedTests || 0,
-    duration: Math.round((data.testResults || []).reduce((a, s) => a + (s.perfStats?.runtime || 0), 0)),
+    duration: Math.round(data.testResults?.reduce((a, s) => a + ((s.endTime || 0) - (s.startTime || 0)), 0) || 0),
   };
 }
 

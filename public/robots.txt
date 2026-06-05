@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://github.com/Reinel-ing/EduCampus-Frontend/blob/main/public/sitemap.xml
+Sitemap: https://raw.githubusercontent.com/Reinel-ing/EduCampus-Frontend/main/README.md
+
+# No indexar
+Disallow: /node_modules/
+Disallow: /.git/
+Disallow: /dist/
+Disallow: /test/

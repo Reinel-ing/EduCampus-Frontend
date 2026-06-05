@@ -161,20 +161,22 @@ function badge(status) {
     : `<span class="badge fail">✗ FAIL</span>`;
 }
 
-function suiteRows(suites) {
+function suiteRows(suites, prefix = "") {
   return suites
     .map(
-      (s, si) => `
-    <div class="suite ${s.failed > 0 ? "suite-fail" : "suite-pass"}" id="suite-${si}">
-      <div class="suite-header" onclick="toggleSuite(${si})">
+      (s, si) => {
+        const id = `${prefix}suite-${si}`;
+        return `
+    <div class="suite ${s.failed > 0 ? "suite-fail" : "suite-pass"}" id="${id}">
+      <div class="suite-header" onclick="toggleSuite('${id}')">
         <span class="suite-icon">${s.failed > 0 ? "✗" : "✓"}</span>
         <span class="suite-name">${esc(s.file)}</span>
         <span class="suite-meta">${s.passed} pass · ${
-        s.failed > 0 ? `<span style="color:#ef4444">${s.failed} fail</span>` : "0 fail"
-      } · ${s.tests.length} total</span>
-        <span class="chevron" id="chev-${si}">▼</span>
+          s.failed > 0 ? `<span style="color:#ef4444">${s.failed} fail</span>` : "0 fail"
+        } · ${s.tests.length} total</span>
+        <span class="chevron" id="${id}-chev">▼</span>
       </div>
-      <div class="suite-body" id="body-${si}">
+      <div class="suite-body" id="${id}-body">
         <table class="test-table">
           <thead><tr><th>Test</th><th>Estado</th><th>ms</th></tr></thead>
           <tbody>
@@ -191,7 +193,8 @@ function suiteRows(suites) {
           </tbody>
         </table>
       </div>
-    </div>`
+    </div>`;
+      }
     )
     .join("");
 }
@@ -433,7 +436,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#0f172a;color:#e2e8f0;mi
 
     <div class="section-title">📋 Resultados por Archivo</div>
     <div id="jest-suites">
-      ${suiteRows(jest.suites)}
+      ${suiteRows(jest.suites, "jest-")}
     </div>
   </section>
 
@@ -453,7 +456,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#0f172a;color:#e2e8f0;mi
 
     <div class="section-title">📋 Resultados por Archivo</div>
     <div id="py-suites">
-      ${suiteRows(py.suites)}
+      ${suiteRows(py.suites, "py-")}
     </div>
   </section>
 
@@ -467,9 +470,9 @@ function showPage(id) {
   document.getElementById('nav-' + id).classList.add('active');
 }
 
-function toggleSuite(idx) {
-  const body = document.getElementById('body-' + idx);
-  const chev = document.getElementById('chev-' + idx);
+function toggleSuite(id) {
+  const body = document.getElementById(id + '-body');
+  const chev = document.getElementById(id + '-chev');
   const isOpen = body.classList.toggle('open');
   chev.classList.toggle('open', isOpen);
 }

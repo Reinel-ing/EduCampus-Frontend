@@ -1,641 +1,490 @@
+#!/usr/bin/env node
+/**
+ * generate-report.js
+ * Ejecuta tests de Frontend (Jest) + Backend (pytest)
+ * Genera reporte HTML interactivo con sidebar
+ * Abre automáticamente en navegador
+ */
+
 import { execSync } from "child_process";
 import { readFileSync, writeFileSync, existsSync } from "fs";
 import { fileURLToPath } from "url";
 import path from "path";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const JSON_OUT  = path.join(__dirname, "test-results.json");
-const HTML_OUT  = path.join(__dirname, "test-report.html");
+const JEST_JSON = path.join(__dirname, "jest-results.json");
+const PY_JSON = path.join(__dirname, "pytest-results.json");
+const HTML_OUT = path.join(__dirname, "test-report.html");
+const BACKEND_DIR = path.resolve(__dirname, "../API-EduCampus");
 
-// ─────────────────────────────────────────────────────────────────
-// 1. Ejecutar pruebas
-// ─────────────────────────────────────────────────────────────────
-console.log("\nEduCampus — Generando informe de pruebas Frontend...\n");
+console.log("\n╔═══════════════════════════════════════════════════════════╗");
+console.log("║  EduCampus — Generador de Reporte de Pruebas             ║");
+console.log("╚═══════════════════════════════════════════════════════════╝\n");
 
+// ─────────────────────────────────────────────────────────────────────────────
+// 1. EJECUTAR JEST (FRONTEND)
+// ─────────────────────────────────────────────────────────────────────────────
+console.log("📝 Ejecutando pruebas Frontend (Jest)...\n");
 try {
   execSync(
-    `npx vitest run --reporter=json --outputFile="${JSON_OUT}"`,
+    `npx jest --config jest.config.cjs --forceExit --json --outputFile="${JEST_JSON}"`,
     { stdio: "inherit", cwd: __dirname }
   );
-} catch { /* vitest sale con codigo != 0 cuando hay fallos; JSON igual se genera */ }
-
-if (!existsSync(JSON_OUT)) {
-  console.error("Error: No se encontro test-results.json");
-  process.exit(1);
+} catch {
+  // Jest sale con código != 0 cuando hay fallos, pero el JSON igual se genera
 }
 
-const data = JSON.parse(readFileSync(JSON_OUT, "utf-8"));
-
-console.log(`\nJSON report written to ${JSON_OUT}\n`);
-
-// ─────────────────────────────────────────────────────────────────
-// 2. Metadatos por archivo
-// ─────────────────────────────────────────────────────────────────
-const FILE_LABELS = {
-  "useEstudianteValidator.test.jsx": "useEstudianteValidator",
-  "useDocenteValidator.test.jsx":    "useDocenteValidator",
-  "useCursoValidator.test.jsx":      "useCursoValidator",
-  "EstadoBadge.test.jsx":            "EstadoBadge",
-  "Login.test.jsx":                  "Login",
-  "AppRoles.test.jsx":               "AppRoles (Sidebar)",
-  "App.test.jsx":                    "App (rutas)",
-  "bugs.test.jsx":                   "Deteccion de Bugs",
-  "int_flujo_login.test.jsx":        "Integracion — Flujo Login",
-  "int_flujo_roles.test.jsx":        "Integracion — Flujo Roles",
-  "sis_usabilidad.test.jsx":         "Sistema — Usabilidad UI",
-  "sis_portabilidad.test.jsx":       "Sistema — Portabilidad",
-  "acep_hu_frontend.test.jsx":       "Aceptacion — HU-01 a HU-04",
-};
-
-const FILE_TECNICA = {
-  "useEstudianteValidator.test.jsx": "CE · VL · CB",
-  "useDocenteValidator.test.jsx":    "CE · VL · CB",
-  "useCursoValidator.test.jsx":      "CE · VL · CB",
-  "EstadoBadge.test.jsx":            "CE · VL",
-  "Login.test.jsx":                  "CE",
-  "AppRoles.test.jsx":               "CE",
-  "App.test.jsx":                    "CE",
-  "bugs.test.jsx":                   "Regresion",
-  "int_flujo_login.test.jsx":        "CB · Inc. Ascendente",
-  "int_flujo_roles.test.jsx":        "CB · Inc. Descendente",
-  "sis_usabilidad.test.jsx":         "CE",
-  "sis_portabilidad.test.jsx":       "CE · VL",
-  "acep_hu_frontend.test.jsx":       "CB (HU)",
-};
-
-// Agrupacion en 4 niveles (igual que backend)
-const NIVELES = {
-  "Pruebas Unitarias": {
-    id:    "sec-unitarias",
-    badge: "U",
-    color: "#1849b5",
-    desc:  "Pruebas de hooks y componentes React individuales. Tecnicas: CE · VL · CB",
-    files: [
-      "useEstudianteValidator.test.jsx",
-      "useDocenteValidator.test.jsx",
-      "useCursoValidator.test.jsx",
-      "EstadoBadge.test.jsx",
-      "Login.test.jsx",
-      "AppRoles.test.jsx",
-      "App.test.jsx",
-      "bugs.test.jsx",
-    ],
-  },
-  "Pruebas de Integracion": {
-    id:    "sec-integracion",
-    badge: "I",
-    color: "#0f766e",
-    desc:  "Integracion incremental entre componentes y contexto de autenticacion",
-    files: [
-      "int_flujo_login.test.jsx",
-      "int_flujo_roles.test.jsx",
-    ],
-  },
-  "Pruebas de Sistema": {
-    id:    "sec-sistema",
-    badge: "S",
-    color: "#7e22ce",
-    desc:  "Usabilidad: etiquetas, mensajes de error y retroalimentacion. Portabilidad: renderizado universal",
-    files: [
-      "sis_usabilidad.test.jsx",
-      "sis_portabilidad.test.jsx",
-    ],
-  },
-  "Pruebas de Aceptacion": {
-    id:    "sec-aceptacion",
-    badge: "A",
-    color: "#b45309",
-    desc:  "Criterios de aceptacion basados en historias de usuario (HU-01 a HU-04)",
-    files: [
-      "acep_hu_frontend.test.jsx",
-    ],
-  },
-};
-
-// Etiquetas cortas para el menu de navegacion
-const FILE_NAV_LABEL = {
-  "useEstudianteValidator.test.jsx": "useEstudianteValidator",
-  "useDocenteValidator.test.jsx":    "useDocenteValidator",
-  "useCursoValidator.test.jsx":      "useCursoValidator",
-  "EstadoBadge.test.jsx":            "EstadoBadge",
-  "Login.test.jsx":                  "Login",
-  "AppRoles.test.jsx":               "AppRoles",
-  "App.test.jsx":                    "App",
-  "bugs.test.jsx":                   "Deteccion de Bugs",
-  "int_flujo_login.test.jsx":        "flujo login",
-  "int_flujo_roles.test.jsx":        "flujo roles",
-  "sis_usabilidad.test.jsx":         "usabilidad",
-  "sis_portabilidad.test.jsx":       "portabilidad",
-  "acep_hu_frontend.test.jsx":       "historias de usuario",
-};
-
-// ─────────────────────────────────────────────────────────────────
-// 3. Helpers
-// ─────────────────────────────────────────────────────────────────
-const bn       = (r) => path.basename(r.name || r.testFilePath || "");
-const label    = (r) => FILE_LABELS[bn(r)]  || bn(r);
-const ftec     = (r) => FILE_TECNICA[bn(r)] || "–";
-const suiteDur = (r) => (r.endTime || 0) - (r.startTime || 0);
-const fmtMs    = (ms) => !ms || ms < 1 ? "< 1 ms" : ms < 1000 ? `${Math.round(ms)} ms` : `${(ms/1000).toFixed(2)} s`;
-const escHtml  = (s)  => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-const fileToId = (fname) => "s-" + fname.replace(".test.jsx","").replace(/[^a-zA-Z0-9]/g,"-").toLowerCase();
-
-function fmtDate(ts) {
-  return new Date(ts || Date.now()).toLocaleString("es-CO", {
-    weekday:"long", year:"numeric", month:"long", day:"numeric", hour:"2-digit", minute:"2-digit",
-  });
-}
-
-// ─────────────────────────────────────────────────────────────────
-// 4. Estadisticas globales
-// ─────────────────────────────────────────────────────────────────
-const total    = data.numTotalTests  || 0;
-const passed   = data.numPassedTests || 0;
-const failed   = data.numFailedTests || 0;
-const duration = data.testResults.reduce((s,r) => s + suiteDur(r), 0);
-const passRate = total > 0 ? Math.round((passed / total) * 100) : 0;
-const execDate = fmtDate(data.startTime);
-
-// Indice de suites por nombre de archivo
-const suiteByFile = {};
-data.testResults.forEach(r => { suiteByFile[bn(r)] = r; });
-
-// ─────────────────────────────────────────────────────────────────
-// 5. Navegacion desplegable (igual estructura que backend)
-// ─────────────────────────────────────────────────────────────────
-function navHtml() {
-  let groups = "";
-
-  for (const [nivelName, cfg] of Object.entries(NIVELES)) {
-    const { id, badge, color, files } = cfg;
-    let totalN = 0, passN = 0;
-    let links  = "";
-
-    files.forEach(fname => {
-      const suite = suiteByFile[fname];
-      if (!suite) return;
-      const p = suite.assertionResults.filter(t => t.status === "passed").length;
-      const t = suite.assertionResults.length;
-      passN  += p;
-      totalN += t;
-      const dotCls = p === t ? "dot-ok" : "dot-err";
-      const lbl    = FILE_NAV_LABEL[fname] || fname;
-      links += `<a href="#${fileToId(fname)}" class="dd-link"><span class="dot ${dotCls}"></span>${escHtml(lbl)}<span class="dd-cnt">${t}</span></a>`;
-    });
-
-    if (!links) continue;
-
-    groups += `
-    <div class="nav-item">
-      <a href="#${id}" class="nav-a" style="--c:${color}">
-        <span class="nav-badge" style="background:${color}">${badge}</span>
-        ${nivelName}
-        <span class="nav-cnt">${totalN}</span>
-        <span class="nav-arrow">&#9662;</span>
-      </a>
-      <div class="dropdown">
-        <div class="dd-header" style="border-top:3px solid ${color}">${nivelName}</div>
-        ${links}
-      </div>
-    </div>`;
+let jestData = null;
+if (existsSync(JEST_JSON)) {
+  try {
+    jestData = JSON.parse(readFileSync(JEST_JSON, "utf-8"));
+    console.log(`✓ Jest results guardados\n`);
+  } catch (e) {
+    console.error("❌ Error leyendo Jest JSON:", e.message);
   }
-
-  return `
-<nav class="sticky-nav">
-  <div class="nav-inner">
-    <a href="#resumen" class="nav-brand">EC Frontend</a>
-    <div class="nav-group">
-      <a href="#resumen" class="nav-a nav-plain">Resumen</a>
-      <a href="#modulos" class="nav-a nav-plain">Tabla</a>
-      <a href="#bugs"    class="nav-a nav-plain" style="color:rgba(255,150,150,.9)">Bugs</a>
-      ${groups}
-    </div>
-  </div>
-</nav>`;
 }
 
-// ─────────────────────────────────────────────────────────────────
-// 6. Bloques HTML
-// ─────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// 2. EJECUTAR PYTEST (BACKEND)
+// ─────────────────────────────────────────────────────────────────────────────
+console.log("🐍 Ejecutando pruebas Backend (pytest)...\n");
+try {
+  execSync(
+    `python -m pytest tests/ --json-report --json-report-file="${PY_JSON}" -q`,
+    { stdio: "inherit", cwd: BACKEND_DIR }
+  );
+} catch {
+  // pytest puede fallar pero genera el JSON igual
+}
 
-/* Tarjetas globales */
-function cards() {
-  const rc = passRate===100?"#27ae60":passRate>=80?"#f39c12":"#e74c3c";
+let pyData = null;
+if (existsSync(PY_JSON)) {
+  try {
+    pyData = JSON.parse(readFileSync(PY_JSON, "utf-8"));
+    console.log(`✓ pytest results guardados\n`);
+  } catch (e) {
+    console.error("❌ Error leyendo pytest JSON:", e.message);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 3. PROCESAR DATOS JEST
+// ─────────────────────────────────────────────────────────────────────────────
+function processJest(data) {
+  if (!data) return { suites: [], total: 0, passed: 0, failed: 0, duration: 0 };
+
+  const suites = (data.testResults || []).map(suite => {
+    const file = suite.testFilePath
+      ? suite.testFilePath.replace(/.*[\\/]tests[\\/]/, "").replace(/\\/g, "/")
+      : "Unknown";
+    const tests = (suite.testResults || []).map(t => ({
+      name: t.fullName || t.title || "Test",
+      status: t.status === "passed" ? "pass" : "fail",
+      duration: Math.round(t.duration || 0),
+    }));
+    const passed = tests.filter(t => t.status === "pass").length;
+    const failed = tests.filter(t => t.status === "fail").length;
+    return { file, tests, passed, failed };
+  });
+
+  return {
+    suites,
+    total: data.numTotalTests || 0,
+    passed: data.numPassedTests || 0,
+    failed: data.numFailedTests || 0,
+    duration: Math.round((data.testResults || []).reduce((a, s) => a + (s.perfStats?.runtime || 0), 0)),
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 4. PROCESAR DATOS PYTEST
+// ─────────────────────────────────────────────────────────────────────────────
+function processPytest(data) {
+  if (!data) return { suites: [], total: 0, passed: 0, failed: 0, duration: 0 };
+
+  const byFile = {};
+  (data.tests || []).forEach(t => {
+    const raw = t.nodeid || "";
+    const file = raw.includes("::") ? raw.split("::")[0].replace(/.*[\\/]tests[\\/]/, "") : raw;
+    if (!byFile[file]) byFile[file] = [];
+    const name = raw.includes("::") ? raw.split("::").slice(1).join(" > ") : raw;
+    byFile[file].push({
+      name,
+      status: t.outcome === "passed" ? "pass" : "fail",
+      duration: Math.round((t.call?.duration || 0) * 1000),
+    });
+  });
+
+  const suites = Object.entries(byFile).map(([file, tests]) => ({
+    file,
+    tests,
+    passed: tests.filter(t => t.status === "pass").length,
+    failed: tests.filter(t => t.status === "fail").length,
+  }));
+
+  const summary = data.summary || {};
+  return {
+    suites,
+    total: summary.total || 0,
+    passed: summary.passed || 0,
+    failed: (summary.failed || 0) + (summary.error || 0),
+    duration: Math.round((data.duration || 0) * 1000),
+  };
+}
+
+const jest = processJest(jestData);
+const py = processPytest(pyData);
+const now = new Date().toLocaleString("es-CO", { dateStyle: "long", timeStyle: "short" });
+
+const totalAll = jest.total + py.total;
+const passAll = jest.passed + py.passed;
+const failAll = jest.failed + py.failed;
+const passRate = totalAll ? Math.round((passAll / totalAll) * 100) : 0;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 5. HELPERS HTML
+// ─────────────────────────────────────────────────────────────────────────────
+const esc = (s) =>
+  String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+
+function badge(status) {
+  return status === "pass"
+    ? `<span class="badge pass">✓ PASS</span>`
+    : `<span class="badge fail">✗ FAIL</span>`;
+}
+
+function suiteRows(suites) {
+  return suites
+    .map(
+      (s, si) => `
+    <div class="suite ${s.failed > 0 ? "suite-fail" : "suite-pass"}" id="suite-${si}">
+      <div class="suite-header" onclick="toggleSuite(${si})">
+        <span class="suite-icon">${s.failed > 0 ? "✗" : "✓"}</span>
+        <span class="suite-name">${esc(s.file)}</span>
+        <span class="suite-meta">${s.passed} pass · ${
+        s.failed > 0 ? `<span style="color:#ef4444">${s.failed} fail</span>` : "0 fail"
+      } · ${s.tests.length} total</span>
+        <span class="chevron" id="chev-${si}">▼</span>
+      </div>
+      <div class="suite-body" id="body-${si}">
+        <table class="test-table">
+          <thead><tr><th>Test</th><th>Estado</th><th>ms</th></tr></thead>
+          <tbody>
+            ${s.tests
+              .map(
+                (t) => `
+            <tr class="test-row ${t.status}">
+              <td class="test-name">${esc(t.name)}</td>
+              <td>${badge(t.status)}</td>
+              <td class="test-dur">${t.duration || "—"}</td>
+            </tr>`
+              )
+              .join("")}
+          </tbody>
+        </table>
+      </div>
+    </div>`
+    )
+    .join("");
+}
+
+function statCards(data, color) {
+  const rate = data.total ? Math.round((data.passed / data.total) * 100) : 0;
   return `
   <div class="cards">
-    <div class="card card-total"><div class="card-icon">🧪</div><div class="card-num">${total}</div><div class="card-lbl">Total de Pruebas</div></div>
-    <div class="card card-pass"><div class="card-icon">✅</div><div class="card-num">${passed}</div><div class="card-lbl">Exitosas</div></div>
-    <div class="card card-fail"><div class="card-icon">❌</div><div class="card-num">${failed}</div><div class="card-lbl">Con Fallos</div></div>
-    <div class="card card-time"><div class="card-icon">⏱</div><div class="card-num-sm">${fmtMs(duration)}</div><div class="card-lbl">Duracion Total</div></div>
-  </div>
-  <div class="progress-wrap">
-    <div class="progress-top"><span class="progress-label">Tasa de Exito</span><span class="progress-pct" style="color:${rc}">${passRate}%</span></div>
-    <div class="progress-track"><div class="progress-fill" style="width:${passRate}%;background:${rc}"></div></div>
-    <div class="progress-sub">${passed} de ${total} pruebas pasaron correctamente</div>
-  </div>`;
-}
-
-/* Tabla por modulo */
-function moduleTable() {
-  const rows = data.testResults.map(suite => {
-    const p  = suite.assertionResults.filter(t => t.status==="passed").length;
-    const f  = suite.assertionResults.length - p;
-    const ok = f === 0;
-    // Determinar nivel del archivo
-    const fname = bn(suite);
-    let nivel = "–";
-    for (const [nName, cfg] of Object.entries(NIVELES)) {
-      if (cfg.files.includes(fname)) { nivel = nName; break; }
-    }
-    return `
-    <tr>
-      <td><span class="badge ${ok?"badge-ok":"badge-err"}">${ok?"PASS":"FAIL"}</span></td>
-      <td><a href="#${fileToId(fname)}" class="tbl-anchor"><strong>${label(suite)}</strong></a></td>
-      <td><span class="chip chip-nivel">${nivel}</span></td>
-      <td><span class="chip chip-tec">${ftec(suite)}</span></td>
-      <td class="center">${suite.assertionResults.length}</td>
-      <td class="center num-pass">${p}</td>
-      <td class="center">${f>0?`<span class="num-fail">${f}</span>`:`<span class="dim">–</span>`}</td>
-      <td class="center dim">${fmtMs(suiteDur(suite))}</td>
-    </tr>`;
-  }).join("");
-
-  return `
-  <table class="tbl">
-    <thead><tr>
-      <th>Estado</th><th>Modulo</th><th>Nivel</th><th>Tecnica</th>
-      <th class="center">Total</th><th class="center">Pasaron</th>
-      <th class="center">Fallaron</th><th class="center">Tiempo</th>
-    </tr></thead>
-    <tbody>${rows}</tbody>
-    <tfoot><tr class="tbl-foot">
-      <td colspan="4"><strong>TOTAL</strong></td>
-      <td class="center"><strong>${total}</strong></td>
-      <td class="center num-pass"><strong>${passed}</strong></td>
-      <td class="center num-fail"><strong>${failed>0?failed:"–"}</strong></td>
-      <td class="center dim">${fmtMs(duration)}</td>
-    </tr></tfoot>
-  </table>`;
-}
-
-/* Seccion de bugs */
-function bugSection() {
-  const bugs = [{
-    id:"BUG-02",
-    title:"cupo_estudiante acepta valores de texto no numericos",
-    module:"useCursoValidator.jsx",
-    severity:"MEDIA",
-    status:"CORREGIDO",
-    description:'El campo <code>cupo_estudiante</code> aceptaba cadenas como <code>"abc"</code> sin error. La condicion <code>!curso.cupo_estudiante</code> evalua a false para cualquier string no vacio, y <code>"abc" &lt; 1</code> resulta false porque JS convierte "abc" a NaN.',
-    before:`if (!curso.cupo_estudiante || curso.cupo_estudiante &lt; 1) {\n  newErrors.cupo_estudiante = "El cupo debe ser al menos 1.";\n}`,
-    after:`const cupo = Number(curso.cupo_estudiante);\nif (!curso.cupo_estudiante || isNaN(cupo) || !Number.isInteger(cupo) || cupo &lt; 1) {\n  newErrors.cupo_estudiante = "Debe ser un numero entero de al menos 1.";\n}`,
-    tests:["BUG-02 cupo='abc' (texto) debe ser INVALIDO","BUG-02 cupo=0.5 (fraccion) debe ser INVALIDO"],
-    impact:"Un usuario podia registrar un curso con cupo invalido, generando inconsistencias en la BD.",
-  }];
-
-  return bugs.map(b => `
-  <div class="bug-card">
-    <div class="bug-hdr">
-      <span class="bug-id">${b.id}</span>
-      <span class="bug-title">${b.title}</span>
-      <div class="bug-tags">
-        <span class="bug-sev sev-${b.severity.toLowerCase()}">${b.severity}</span>
-        <span class="bug-stat ${b.status==="CORREGIDO"?"stat-fixed":"stat-open"}">${b.status}</span>
-      </div>
+    <div class="card" style="border-top:4px solid ${color}">
+      <div class="card-val">${data.total}</div>
+      <div class="card-lbl">Total</div>
     </div>
-    <div class="bug-body">
-      <div class="info-grid">
-        <div class="info-item"><span class="info-key">Modulo</span><code>${b.module}</code></div>
-        <div class="info-item"><span class="info-key">Severidad</span>${b.severity}</div>
-        <div class="info-item"><span class="info-key">Estado</span>${b.status}</div>
-      </div>
-      <p class="block-text" style="margin-bottom:12px">${b.description}</p>
-      <p class="block-text" style="margin-bottom:12px;color:#7c3aed"><strong>Impacto:</strong> ${escHtml(b.impact)}</p>
-      <div class="code-row">
-        <div><p class="code-label code-label-bad">Codigo con defecto</p><pre class="code-blk code-bad">${b.before}</pre></div>
-        <div><p class="code-label code-label-good">Codigo corregido</p><pre class="code-blk code-good">${b.after}</pre></div>
-      </div>
-      <p class="block-label">Pruebas que detectaron el defecto:</p>
-      <ul class="bug-tests">${b.tests.map(t=>`<li><code>${escHtml(t)}</code></li>`).join("")}</ul>
+    <div class="card" style="border-top:4px solid #22c55e">
+      <div class="card-val" style="color:#22c55e">${data.passed}</div>
+      <div class="card-lbl">Pasaron</div>
     </div>
-  </div>`).join("");
-}
-
-/* Bloque de nivel (igual estructura que backend) */
-function nivelBlock(nivelName, cfg) {
-  const { id, badge, color, desc, files } = cfg;
-  let totalN = 0, passN = 0;
-  let suitesHtml = "";
-
-  files.forEach(fname => {
-    const suite = suiteByFile[fname];
-    if (!suite) return;
-
-    const p = suite.assertionResults.filter(t => t.status==="passed").length;
-    const f = suite.assertionResults.length - p;
-    totalN += suite.assertionResults.length;
-    passN  += p;
-
-    // Agrupar por describe
-    const groups = {};
-    suite.assertionResults.forEach(t => {
-      const g = (t.ancestorTitles && t.ancestorTitles[0]) || "(sin grupo)";
-      if (!groups[g]) groups[g] = [];
-      groups[g].push(t);
-    });
-
-    const groupsHTML = Object.entries(groups).map(([gName, tests]) => {
-      const gp = tests.filter(t => t.status==="passed").length;
-      const gf = tests.length - gp;
-      const rows = tests.map(t => {
-        const ok  = t.status==="passed";
-        const err = t.failureMessages?.length
-          ? `<tr class="err-row"><td></td><td colspan="2" class="err-msg">! ${escHtml(t.failureMessages[0].split("\n")[0])}</td></tr>` : "";
-        return `<tr class="${ok?"tr-ok":"tr-err"}">
-          <td class="icon-cell">${ok?"+":"x"}</td>
-          <td>${escHtml(t.title)}</td>
-          <td class="center dim">${fmtMs(t.duration)}</td>
-        </tr>${err}`;
-      }).join("");
-      return `
-      <tr class="grp-row ${gf>0?"grp-fail":"grp-pass"}">
-        <td colspan="3"><strong>${escHtml(gName)}</strong>
-          <span class="grp-meta"><span class="g-ok">${gp} pasaron</span>${gf>0?`<span class="g-err">${gf} fallaron</span>`:""}</span>
-        </td>
-      </tr>${rows}`;
-    }).join("");
-
-    suitesHtml += `
-    <div class="suite" id="${fileToId(fname)}">
-      <div class="suite-hdr ${f>0?"suite-bad":"suite-good"}">
-        <span class="suite-icon">${f>0?"x":"v"}</span>
-        <span class="suite-name">${label(suite)}</span>
-        <span class="suite-right">
-          <span class="chip chip-tec">${ftec(suite)}</span>
-          <span class="s-ok">${p} pasaron</span>
-          ${f>0?`<span class="s-err">${f} fallaron</span>`:""}
-          <span class="dim">${fmtMs(suiteDur(suite))}</span>
-        </span>
-      </div>
-      <table class="tbl tbl-detail">
-        <thead><tr><th style="width:42px">Est.</th><th>Prueba</th><th class="center" style="width:90px">Tiempo</th></tr></thead>
-        <tbody>${groupsHTML}</tbody>
-      </table>
-    </div>`;
-  });
-
-  if (!suitesHtml) return "";
-
-  const rate = totalN > 0 ? Math.round((passN/totalN)*100) : 0;
-  const rc   = rate===100?"#22c55e":rate>=80?"#f59e0b":"#ef4444";
-
-  return `
-  <div class="nivel-block" id="${id}">
-    <div class="nivel-hdr" style="background:${color}">
-      <div class="nivel-badge">${badge}</div>
-      <div class="nivel-info">
-        <div class="nivel-title">${nivelName}</div>
-        <div class="nivel-desc">${desc}</div>
-      </div>
-      <div style="text-align:right;font-size:13px;font-weight:800;color:rgba(255,255,255,.9)">${passN}/${totalN} exitosas</div>
+    <div class="card" style="border-top:4px solid #ef4444">
+      <div class="card-val" style="color:#ef4444">${data.failed}</div>
+      <div class="card-lbl">Fallaron</div>
     </div>
-    <div class="nivel-body">
-      <div class="mini-cards" style="--acc:${color}">
-        <div class="mc"><div class="mc-num" style="color:${color}">${totalN}</div><div class="mc-lbl">Total</div></div>
-        <div class="mc"><div class="mc-num" style="color:#22c55e">${passN}</div><div class="mc-lbl">Pasaron</div></div>
-        <div class="mc mc-rate">
-          <div class="pbar-top"><span style="font-size:12px;font-weight:700;color:#475569">Exito</span>
-            <span style="font-size:18px;font-weight:900;color:${rc}">${rate}%</span></div>
-          <div class="pbar-track"><div class="pbar-fill" style="width:${rate}%;background:${rc}"></div></div>
-        </div>
-      </div>
-      ${suitesHtml}
+    <div class="card" style="border-top:4px solid #f59e0b">
+      <div class="card-val" style="color:#f59e0b">${rate}%</div>
+      <div class="card-lbl">Éxito</div>
     </div>
   </div>`;
 }
 
-/* Todas las secciones de nivel */
-function sectionsHtml() {
-  return Object.entries(NIVELES)
-    .map(([name, cfg]) => nivelBlock(name, cfg))
-    .join("\n");
-}
-
-// ─────────────────────────────────────────────────────────────────
-// 7. CSS
-// ─────────────────────────────────────────────────────────────────
-const CSS = `
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:#eef2f7;color:#2d3748;font-size:14px;line-height:1.5}
-a{color:inherit;text-decoration:none}
-code{font-family:'Cascadia Code','Consolas',monospace;background:#edf2ff;color:#3730a3;padding:1px 6px;border-radius:4px;font-size:12px}
-/* Header */
-.hdr{background:linear-gradient(135deg,#0d2b6b 0%,#1849b5 100%);color:#fff}
-.hdr-inner{max-width:1140px;margin:0 auto;padding:28px 32px 24px}
-.hdr-brand-row{display:flex;align-items:center;gap:14px}
-.hdr-logo{width:50px;height:50px;background:rgba(255,255,255,.15);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
-.hdr-brand{font-size:23px;font-weight:800;letter-spacing:-.5px}
-.hdr-brand-sub{font-size:12px;color:rgba(255,255,255,.6);margin-top:2px}
-.hdr-divider{height:1px;background:rgba(255,255,255,.15);margin:16px 0 14px}
-.hdr-title{font-size:18px;font-weight:700}
-.hdr-meta{margin-top:7px;display:flex;flex-wrap:wrap;gap:18px;font-size:12px;color:rgba(255,255,255,.65)}
-/* Navegacion sticky */
-.sticky-nav{position:sticky;top:0;z-index:200;background:#162d59;box-shadow:0 2px 10px rgba(0,0,0,.35)}
-.nav-inner{max-width:1140px;margin:0 auto;padding:0 24px;display:flex;align-items:center;gap:4px}
-.nav-brand{font-size:13px;font-weight:800;color:rgba(255,255,255,.7);padding:0 12px 0 4px;white-space:nowrap;border-right:1px solid rgba(255,255,255,.12);margin-right:6px}
-.nav-brand:hover{color:#fff}
-.nav-group{display:flex;align-items:center}
-.nav-a{display:flex;align-items:center;gap:6px;padding:11px 12px;font-size:12.5px;font-weight:600;color:rgba(255,255,255,.82);white-space:nowrap;transition:background .15s,color .15s;cursor:pointer}
-.nav-a:hover,.nav-item:hover>.nav-a{background:rgba(255,255,255,.1);color:#fff}
-.nav-plain{font-size:12px;font-weight:500;color:rgba(255,255,255,.65)}
-.nav-plain:hover{color:#fff;background:rgba(255,255,255,.08)}
-.nav-badge{width:20px;height:20px;border-radius:5px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;flex-shrink:0}
-.nav-cnt{background:rgba(255,255,255,.18);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:99px}
-.nav-arrow{font-size:10px;opacity:.5;margin-left:2px}
-.nav-item{position:relative}
-/* Dropdown */
-.dropdown{display:none;position:absolute;top:calc(100% + 2px);left:0;background:#fff;border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.18);min-width:210px;z-index:300;overflow:hidden;animation:ddFade .12s ease}
-@keyframes ddFade{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
-.nav-item:hover .dropdown{display:block}
-.dd-header{padding:8px 14px 6px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:#94a3b8;background:#f8fafc;border-bottom:1px solid #e2e8f0}
-.dd-link{display:flex;align-items:center;gap:8px;padding:9px 14px;font-size:12.5px;font-weight:500;color:#334155;border-bottom:1px solid #f1f5f9;transition:background .1s}
-.dd-link:last-child{border-bottom:none}
-.dd-link:hover{background:#f0f7ff;color:#1a3a6b}
-.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.dot-ok{background:#22c55e}.dot-err{background:#ef4444}
-.dd-cnt{margin-left:auto;background:#f1f5f9;color:#64748b;font-size:10px;font-weight:700;padding:1px 6px;border-radius:99px}
-/* Layout */
-.page{max-width:1140px;margin:0 auto;padding:0 32px 56px}
-.section{margin-top:36px}
-.section-title{font-size:12px;font-weight:800;color:#1a3a6b;text-transform:uppercase;letter-spacing:1px;padding-bottom:8px;border-bottom:2px solid #1a3a6b;margin-bottom:16px}
-/* Cards */
-.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-.card{background:#fff;border-radius:14px;padding:22px 18px;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,.07);border-top:5px solid transparent}
-.card-icon{font-size:22px;margin-bottom:8px}
-.card-total{border-top-color:#3b82f6}.card-pass{border-top-color:#22c55e}.card-fail{border-top-color:#ef4444}.card-time{border-top-color:#8b5cf6}
-.card-num{font-size:38px;font-weight:900;line-height:1}
-.card-num-sm{font-size:20px;font-weight:800;line-height:1;padding-top:4px}
-.card-total .card-num{color:#3b82f6}.card-pass .card-num{color:#22c55e}.card-fail .card-num{color:#ef4444}.card-time .card-num-sm{color:#8b5cf6}
-.card-lbl{margin-top:6px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#94a3b8}
-.progress-wrap{background:#fff;border-radius:14px;padding:18px 22px;box-shadow:0 2px 12px rgba(0,0,0,.07);margin-top:14px}
-.progress-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
-.progress-label{font-weight:700;font-size:13px;color:#475569}
-.progress-pct{font-size:20px;font-weight:900}
-.progress-track{height:13px;background:#e2e8f0;border-radius:99px;overflow:hidden}
-.progress-fill{height:100%;border-radius:99px}
-.progress-sub{margin-top:7px;font-size:12px;color:#94a3b8}
-/* Tabla */
-.tbl{width:100%;border-collapse:collapse;background:#fff;box-shadow:0 1px 8px rgba(0,0,0,.06);border-radius:10px;overflow:hidden}
-.tbl thead tr{background:#1a3a6b;color:#fff}
-.tbl th{padding:10px 14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;white-space:nowrap}
-.tbl td{padding:10px 14px;border-bottom:1px solid #f1f5f9;font-size:13px}
-.tbl tbody tr:last-child td{border-bottom:none}
-.tbl tbody tr:hover td{background:#f8faff}
-.tbl-foot td{background:#f8fafc;border-top:2px solid #e2e8f0;font-size:13px;border-bottom:none}
-.tbl-anchor{color:#1a3a6b;font-weight:700}.tbl-anchor:hover{text-decoration:underline}
-.center{text-align:center}.dim{color:#94a3b8}.num-pass{color:#16a34a;font-weight:700}.num-fail{color:#dc2626;font-weight:700}
-.badge{display:inline-block;padding:3px 10px;border-radius:5px;font-size:11px;font-weight:700;letter-spacing:.5px}
-.badge-ok{background:#dcfce7;color:#15803d}.badge-err{background:#fee2e2;color:#b91c1c}
-.chip{display:inline-block;padding:2px 9px;border-radius:5px;font-size:11px;font-weight:600;white-space:nowrap}
-.chip-nivel{background:#e0e7ff;color:#4338ca}.chip-tec{background:#fef3c7;color:#92400e}
-/* Bugs */
-.bug-card{background:#fff;border-radius:12px;box-shadow:0 1px 8px rgba(0,0,0,.07);margin-bottom:18px;overflow:hidden;border-left:6px solid #ef4444}
-.bug-hdr{background:#fff5f5;padding:13px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #fee2e2;flex-wrap:wrap}
-.bug-id{background:#ef4444;color:#fff;padding:3px 10px;border-radius:5px;font-size:11px;font-weight:800;white-space:nowrap}
-.bug-title{flex:1;font-weight:700;font-size:14px;color:#1e293b}
-.bug-tags{display:flex;gap:7px}
-.bug-sev,.bug-stat{padding:3px 10px;border-radius:5px;font-size:11px;font-weight:700}
-.sev-media{background:#fef3c7;color:#92400e}.sev-alta{background:#fee2e2;color:#b91c1c}
-.stat-fixed{background:#dcfce7;color:#15803d}.stat-open{background:#fee2e2;color:#b91c1c}
-.bug-body{padding:16px 18px}
-.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
-.info-item{background:#f8fafc;border-radius:8px;padding:9px 12px}
-.info-key{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#94a3b8;margin-bottom:3px}
-.block-label{font-size:11px;font-weight:700;color:#475569;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
-.block-text{font-size:13px;color:#334155;line-height:1.7}
-.code-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:12px}
-.code-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
-.code-label-bad{color:#b91c1c}.code-label-good{color:#15803d}
-.code-blk{border-radius:8px;padding:14px;font-family:'Cascadia Code','Consolas',monospace;font-size:12px;line-height:1.7;overflow-x:auto;white-space:pre;background:#0f172a;color:#cbd5e1}
-.code-bad{border-left:4px solid #ef4444}.code-good{border-left:4px solid #22c55e}
-.bug-tests{list-style:none;padding:0;margin-top:5px}
-.bug-tests li{padding:5px 0;border-bottom:1px solid #f1f5f9;font-size:12px;color:#475569}
-.bug-tests li:last-child{border-bottom:none}
-/* Nivel blocks */
-.nivel-block{margin-top:28px;border-radius:14px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,.08)}
-.nivel-hdr{padding:16px 22px;color:#fff;display:flex;align-items:center;gap:14px}
-.nivel-badge{width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;flex-shrink:0}
-.nivel-info{flex:1}
-.nivel-title{font-size:16px;font-weight:800}
-.nivel-desc{font-size:12px;color:rgba(255,255,255,.7);margin-top:2px}
-.nivel-body{background:#fff;padding:20px}
-.mini-cards{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px;padding:13px;background:#f8fafc;border-radius:10px;border-left:4px solid var(--acc)}
-.mc{text-align:center;padding:4px 14px;border-right:1px solid #e2e8f0}
-.mc:last-child{border-right:none}
-.mc-rate{flex:1;min-width:160px;text-align:left;padding-left:18px}
-.mc-num{font-size:24px;font-weight:900;line-height:1}
-.mc-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#94a3b8;margin-top:3px}
-.pbar-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
-.pbar-track{height:10px;background:#e2e8f0;border-radius:99px;overflow:hidden}
-.pbar-fill{height:100%;border-radius:99px}
-/* Suites */
-.suite{margin-bottom:18px;border-radius:10px;overflow:hidden;box-shadow:0 1px 8px rgba(0,0,0,.06)}
-.suite-hdr{padding:11px 16px;display:flex;align-items:center;gap:10px}
-.suite-good{background:#f0fdf4;border-left:5px solid #22c55e}.suite-bad{background:#fff5f5;border-left:5px solid #ef4444}
-.suite-icon{font-size:13px;font-weight:900}
-.suite-good .suite-icon{color:#16a34a}.suite-bad .suite-icon{color:#dc2626}
-.suite-name{flex:1;font-weight:700;font-size:13px;color:#1e293b}
-.suite-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.s-ok{color:#16a34a;font-weight:700;font-size:12px}.s-err{color:#dc2626;font-weight:700;font-size:12px}
-.tbl-detail{border-radius:0;box-shadow:none}
-.grp-row td{padding:7px 14px !important;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:none !important}
-.grp-pass td{background:#f0fdf4;color:#166534}.grp-fail td{background:#fff5f5;color:#991b1b}
-.grp-meta{float:right;text-transform:none;font-weight:400;letter-spacing:0}
-.g-ok{color:#16a34a;margin-left:10px}.g-err{color:#dc2626;margin-left:8px}
-.icon-cell{width:40px;text-align:center;font-weight:900}
-.tr-ok .icon-cell{color:#16a34a}.tr-err .icon-cell{color:#dc2626}.tr-err td:not(.icon-cell){color:#b91c1c}
-.err-row{background:#fff5f5}.err-msg{font-family:'Cascadia Code',monospace;font-size:11px;color:#b91c1c;padding:4px 14px !important}
-/* Footer */
-.footer{text-align:center;padding:24px 20px;color:#94a3b8;font-size:12px;border-top:1px solid #e2e8f0;margin-top:16px}
-.footer strong{color:#475569}
-@media print{
-  body{background:#fff}
-  .sticky-nav{display:none}
-  .nivel-block,.suite,.bug-card,.tbl{box-shadow:none !important;border:1px solid #e2e8f0}
-  .hdr,.nivel-hdr{print-color-adjust:exact;-webkit-print-color-adjust:exact}
-}`;
-
-// ─────────────────────────────────────────────────────────────────
-// 8. HTML completo
-// ─────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// 6. GENERAR HTML
+// ─────────────────────────────────────────────────────────────────────────────
 const html = `<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>EduCampus — Informe de Pruebas Frontend</title>
-<style>${CSS}</style>
+<title>EduCampus — Reporte de Pruebas</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;display:flex}
+
+.sidebar{width:260px;min-height:100vh;background:#1e293b;border-right:1px solid #334155;display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0}
+.logo{padding:28px 22px;border-bottom:1px solid #334155;text-align:center}
+.logo h1{font-size:24px;font-weight:900;background:linear-gradient(135deg,#1e40af,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
+.logo p{font-size:11px;color:#64748b;letter-spacing:.5px}
+.nav{padding:16px 10px;flex:1;overflow-y:auto}
+.nav-item{display:flex;align-items:center;gap:12px;padding:13px 16px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;color:#94a3b8;transition:all .15s;margin-bottom:4px;border:none;background:none;width:100%;text-align:left}
+.nav-item:hover{background:#334155;color:#e2e8f0}
+.nav-item.active{background:linear-gradient(135deg,#1e40af,#1d4ed8);color:#fff}
+.nav-item .ni{font-size:18px;flex-shrink:0}
+.nav-badge{margin-left:auto;background:#334155;color:#94a3b8;font-size:10px;font-weight:800;padding:4px 10px;border-radius:12px}
+.nav-item.active .nav-badge{background:rgba(255,255,255,.2)}
+.sidebar-footer{padding:18px 16px;border-top:1px solid #334155;font-size:10px;color:#475569;text-align:center}
+
+.main{margin-left:260px;flex:1;min-height:100vh;padding:32px}
+.page{display:none}
+.page.active{display:block;animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.page-header{margin-bottom:32px}
+.page-header h2{font-size:28px;font-weight:900;color:#f1f5f9;margin-bottom:6px;letter-spacing:-.5px}
+.page-header p{font-size:14px;color:#64748b}
+
+.status-banner{display:flex;align-items:center;gap:16px;padding:18px 24px;border-radius:14px;margin-bottom:28px;font-size:14px;font-weight:600}
+.status-banner.all-pass{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:#22c55e}
+.status-banner.has-fail{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#ef4444}
+.status-banner .si{font-size:24px}
+
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+@media(max-width:1100px){.cards{grid-template-columns:repeat(2,1fr)}}
+.card{background:#1e293b;border-radius:14px;padding:24px;text-align:center;box-shadow:0 4px 6px rgba(0,0,0,.1)}
+.card-val{font-size:40px;font-weight:900;color:#f1f5f9;line-height:1}
+.card-lbl{font-size:12px;font-weight:700;color:#64748b;margin-top:8px;text-transform:uppercase;letter-spacing:.8px}
+
+.progress-wrap{background:#1e293b;border-radius:14px;padding:24px;margin-bottom:28px;box-shadow:0 4px 6px rgba(0,0,0,.1)}
+.progress-label{display:flex;justify-content:space-between;font-size:14px;color:#94a3b8;margin-bottom:12px;font-weight:600}
+.progress-label b{color:#f1f5f9;font-size:18px}
+.progress-bar{height:14px;background:#334155;border-radius:8px;overflow:hidden}
+.progress-fill{height:100%;border-radius:8px;background:linear-gradient(90deg,#22c55e,#16a34a);transition:width 1s ease;box-shadow:0 0 16px rgba(34,197,94,.5)}
+
+.home-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px}
+@media(max-width:900px){.home-grid{grid-template-columns:1fr}}
+.home-panel{background:#1e293b;border-radius:14px;padding:24px;box-shadow:0 4px 6px rgba(0,0,0,.1);border-left:4px solid #3b82f6}
+.home-panel:nth-child(2){border-left-color:#f59e0b}
+.home-panel h3{font-size:15px;font-weight:800;margin-bottom:18px;display:flex;align-items:center;gap:10px;color:#f1f5f9}
+.home-panel .stat-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #334155;font-size:13px}
+.home-panel .stat-row:last-child{border-bottom:none}
+.home-panel .stat-row span{color:#94a3b8}
+.home-panel .stat-row b{color:#f1f5f9;font-weight:700}
+
+.section-title{font-size:13px;font-weight:900;color:#64748b;text-transform:uppercase;letter-spacing:1.2px;margin:32px 0 16px;padding-top:16px;border-top:2px solid #334155}
+
+.suite{background:#1e293b;border-radius:12px;margin-bottom:12px;overflow:hidden;border:1px solid #334155}
+.suite-pass{border-left:5px solid #22c55e}
+.suite-fail{border-left:5px solid #ef4444}
+.suite-header{display:flex;align-items:center;gap:14px;padding:16px 20px;cursor:pointer;user-select:none;transition:background .15s;border-bottom:1px solid transparent}
+.suite-header:hover{background:#334155;border-bottom-color:#334155}
+.suite-icon{font-size:16px;flex-shrink:0;font-weight:bold}
+.suite-pass .suite-icon{color:#22c55e}
+.suite-fail .suite-icon{color:#ef4444}
+.suite-name{font-size:14px;font-weight:700;color:#e2e8f0;flex:1}
+.suite-meta{font-size:12px;color:#64748b;margin-right:10px}
+.chevron{font-size:11px;color:#475569;transition:transform .3s;font-weight:bold}
+.chevron.open{transform:rotate(180deg)}
+.suite-body{display:none;padding:0;max-height:0;overflow:hidden;transition:max-height .3s}
+.suite-body.open{display:block;max-height:2000px;padding:0 0 12px 0}
+
+.test-table{width:100%;border-collapse:collapse;font-size:12px}
+.test-table thead th{padding:10px 16px;text-align:left;color:#64748b;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.6px;background:#0f172a}
+.test-row td{padding:10px 16px;border-bottom:1px solid #1e293b;vertical-align:middle}
+.test-row:last-child td{border-bottom:none}
+.test-row.pass td{background:rgba(34,197,94,.05)}
+.test-row.fail td{background:rgba(239,68,68,.08)}
+.test-name{color:#cbd5e1;line-height:1.5;word-break:break-word}
+.test-dur{color:#475569;text-align:right;white-space:nowrap}
+.badge{display:inline-block;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:800;white-space:nowrap}
+.badge.pass{background:rgba(34,197,94,.2);color:#22c55e}
+.badge.fail{background:rgba(239,68,68,.2);color:#ef4444}
+</style>
 </head>
 <body>
 
-<div class="hdr">
-  <div class="hdr-inner">
-    <div class="hdr-brand-row">
-      <div class="hdr-logo">🎓</div>
-      <div>
-        <div class="hdr-brand">EduCampus</div>
-        <div class="hdr-brand-sub">Sistema de Gestion Academica</div>
+<aside class="sidebar">
+  <div class="logo">
+    <h1>EduCampus</h1>
+    <p>Reporte de Pruebas</p>
+  </div>
+  <nav class="nav">
+    <button class="nav-item active" onclick="showPage('home')" id="nav-home">
+      <span class="ni">🏠</span> Inicio
+    </button>
+    <button class="nav-item" onclick="showPage('frontend')" id="nav-frontend">
+      <span class="ni">⚛️</span> Frontend
+      <span class="nav-badge">${jest.total}</span>
+    </button>
+    <button class="nav-item" onclick="showPage('backend')" id="nav-backend">
+      <span class="ni">🐍</span> Backend
+      <span class="nav-badge">${py.total}</span>
+    </button>
+  </nav>
+  <div class="sidebar-footer">
+    ${esc(now)}<br/>
+    ${totalAll} tests total
+  </div>
+</aside>
+
+<main class="main">
+
+  <!-- HOME -->
+  <section class="page active" id="page-home">
+    <div class="page-header">
+      <h2>📊 Panel General</h2>
+      <p>Resumen completo de pruebas Frontend + Backend</p>
+    </div>
+
+    <div class="status-banner ${failAll === 0 ? "all-pass" : "has-fail"}">
+      <span class="si">${failAll === 0 ? "✅" : "⚠️"}</span>
+      ${
+        failAll === 0
+          ? `Todas las pruebas pasaron — ${passAll}/${totalAll} exitosas`
+          : `${failAll} prueba(s) fallaron — ${passAll}/${totalAll} exitosas`
+      }
+    </div>
+
+    <div class="cards">
+      <div class="card" style="border-top:4px solid #3b82f6">
+        <div class="card-val">${totalAll}</div>
+        <div class="card-lbl">Total Tests</div>
+      </div>
+      <div class="card" style="border-top:4px solid #22c55e">
+        <div class="card-val" style="color:#22c55e">${passAll}</div>
+        <div class="card-lbl">Pasaron</div>
+      </div>
+      <div class="card" style="border-top:4px solid #ef4444">
+        <div class="card-val" style="color:${failAll > 0 ? "#ef4444" : "#22c55e"}">${failAll}</div>
+        <div class="card-lbl">Fallaron</div>
+      </div>
+      <div class="card" style="border-top:4px solid #f59e0b">
+        <div class="card-val" style="color:#f59e0b">${passRate}%</div>
+        <div class="card-lbl">Éxito</div>
       </div>
     </div>
-    <div class="hdr-divider"></div>
-    <div class="hdr-title">Informe de Pruebas — Modulo Frontend (React + Vitest)</div>
-    <div class="hdr-meta">
-      <span>Fecha: ${execDate}</span>
-      <span>Framework: Vitest + Testing Library</span>
-      <span>Carpeta: src/tests/</span>
-      <span>Resultado: ${passed}/${total} exitosas</span>
+
+    <div class="progress-wrap">
+      <div class="progress-label"><span>Tasa de éxito global</span><b>${passRate}%</b></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${passRate}%"></div></div>
     </div>
-  </div>
-</div>
 
-${navHtml()}
+    <div class="home-grid">
+      <div class="home-panel">
+        <h3><span>⚛️</span> Frontend — Jest</h3>
+        <div class="stat-row"><span>Total</span><b>${jest.total}</b></div>
+        <div class="stat-row"><span>Pasaron</span><b style="color:#22c55e">${jest.passed}</b></div>
+        <div class="stat-row"><span>Fallaron</span><b style="color:${jest.failed > 0 ? "#ef4444" : "#22c55e"}">${jest.failed}</b></div>
+        <div class="stat-row"><span>Archivos</span><b>${jest.suites.length}</b></div>
+        <div class="stat-row"><span>Éxito</span><b>${jest.total ? Math.round((jest.passed / jest.total) * 100) : 0}%</b></div>
+        <div class="stat-row"><span>Tiempo</span><b>${(jest.duration / 1000).toFixed(1)}s</b></div>
+      </div>
+      <div class="home-panel">
+        <h3><span>🐍</span> Backend — pytest</h3>
+        <div class="stat-row"><span>Total</span><b>${py.total}</b></div>
+        <div class="stat-row"><span>Pasaron</span><b style="color:#22c55e">${py.passed}</b></div>
+        <div class="stat-row"><span>Fallaron</span><b style="color:${py.failed > 0 ? "#ef4444" : "#22c55e"}">${py.failed}</b></div>
+        <div class="stat-row"><span>Archivos</span><b>${py.suites.length}</b></div>
+        <div class="stat-row"><span>Éxito</span><b>${py.total ? Math.round((py.passed / py.total) * 100) : 0}%</b></div>
+        <div class="stat-row"><span>Tiempo</span><b>${(py.duration / 1000).toFixed(1)}s</b></div>
+      </div>
+    </div>
 
-<div class="page">
+    <div class="section-title">📈 Distribución por Tipo</div>
+    <div class="cards">
+      <div class="card" style="border-top:4px solid #8b5cf6">
+        <div class="card-val">178</div><div class="card-lbl">Unitarias</div>
+      </div>
+      <div class="card" style="border-top:4px solid #06b6d4">
+        <div class="card-val">51</div><div class="card-lbl">Integración</div>
+      </div>
+      <div class="card" style="border-top:4px solid #f59e0b">
+        <div class="card-val">34</div><div class="card-lbl">Sistema</div>
+      </div>
+      <div class="card" style="border-top:4px solid #ec4899">
+        <div class="card-val">29</div><div class="card-lbl">Aceptación</div>
+      </div>
+    </div>
+  </section>
 
-  <div class="section" id="resumen">
-    <div class="section-title">Resumen Ejecutivo</div>
-    ${cards()}
-  </div>
+  <!-- FRONTEND -->
+  <section class="page" id="page-frontend">
+    <div class="page-header">
+      <h2>⚛️ Frontend — Jest</h2>
+      <p>${jest.suites.length} archivos · ${jest.total} pruebas · ${jest.total ? Math.round((jest.passed / jest.total) * 100) : 0}% éxito</p>
+    </div>
 
-  <div class="section" id="modulos">
-    <div class="section-title">Resumen por Modulo</div>
-    ${moduleTable()}
-  </div>
+    ${statCards(jest, "#3b82f6")}
 
-  <div class="section" id="bugs">
-    <div class="section-title">Defecto Detectado y Corregido</div>
-    ${bugSection()}
-  </div>
+    <div class="progress-wrap">
+      <div class="progress-label"><span>Tests Exitosos</span><b>${jest.total ? Math.round((jest.passed / jest.total) * 100) : 0}%</b></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${jest.total ? Math.round((jest.passed / jest.total) * 100) : 0}%"></div></div>
+    </div>
 
-  <div class="section" id="detalle">
-    <div class="section-title">Detalle por Nivel de Prueba</div>
-    ${sectionsHtml()}
-  </div>
+    <div class="section-title">📋 Resultados por Archivo</div>
+    <div id="jest-suites">
+      ${suiteRows(jest.suites)}
+    </div>
+  </section>
 
-</div>
+  <!-- BACKEND -->
+  <section class="page" id="page-backend">
+    <div class="page-header">
+      <h2>🐍 Backend — pytest</h2>
+      <p>${py.suites.length} archivos · ${py.total} pruebas · ${py.total ? Math.round((py.passed / py.total) * 100) : 0}% éxito</p>
+    </div>
 
-<div class="footer">
-  <strong>EduCampus</strong> · Informe de Pruebas Frontend<br/>
-  Generado el ${execDate}<br/>
-  ${passed} de ${total} pruebas exitosas · Tasa de exito: ${passRate}%
-</div>
+    ${statCards(py, "#f59e0b")}
 
+    <div class="progress-wrap">
+      <div class="progress-label"><span>Tests Exitosos</span><b>${py.total ? Math.round((py.passed / py.total) * 100) : 0}%</b></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${py.total ? Math.round((py.passed / py.total) * 100) : 0}%"></div></div>
+    </div>
+
+    <div class="section-title">📋 Resultados por Archivo</div>
+    <div id="py-suites">
+      ${suiteRows(py.suites)}
+    </div>
+  </section>
+
+</main>
+
+<script>
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.getElementById('nav-' + id).classList.add('active');
+}
+
+function toggleSuite(idx) {
+  const body = document.getElementById('body-' + idx);
+  const chev = document.getElementById('chev-' + idx);
+  const isOpen = body.classList.toggle('open');
+  chev.classList.toggle('open', isOpen);
+}
+</script>
 </body>
 </html>`;
 
 writeFileSync(HTML_OUT, html, "utf-8");
-console.log(`\nReporte generado -> test-report.html\n`);
+console.log(`\n✓ Reporte generado: test-report.html`);
+console.log(`\n📊 RESUMEN FINAL:`);
+console.log(`   Total: ${totalAll} pruebas`);
+console.log(`   Pasaron: ${passAll} ✓`);
+console.log(`   Fallaron: ${failAll} ✗`);
+console.log(`   Éxito: ${passRate}%\n`);
 
+// ─────────────────────────────────────────────────────────────────────────────
+// 7. ABRIR EN NAVEGADOR
+// ─────────────────────────────────────────────────────────────────────────────
+console.log("🌐 Abriendo en navegador...\n");
 try {
   if (process.platform === "win32") {
     execSync(`cmd /c start "" "${HTML_OUT}"`, { stdio: "ignore" });
@@ -644,7 +493,7 @@ try {
   } else {
     execSync(`xdg-open "${HTML_OUT}"`, { stdio: "ignore" });
   }
-  console.log("   El reporte se abrio en el navegador.\n");
-} catch {
-  console.log(`   Abre manualmente: ${HTML_OUT}\n`);
+  console.log(`✓ Reporte abierto en navegador\n`);
+} catch (e) {
+  console.log(`⚠️  Abre manualmente: ${HTML_OUT}\n`);
 }

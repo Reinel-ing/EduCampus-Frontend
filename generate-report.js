@@ -491,16 +491,34 @@ console.log(`   Éxito: ${passRate}%\n`);
 // ─────────────────────────────────────────────────────────────────────────────
 // 7. ABRIR EN NAVEGADOR
 // ─────────────────────────────────────────────────────────────────────────────
-console.log("🌐 Abriendo en navegador...\n");
+const fileUrl = `file:///${HTML_OUT.replace(/\\/g, "/")}`;
+console.log("╔════════════════════════════════════════════════════════════╗");
+console.log("║  🌐 ABRIENDO REPORTE DE PRUEBAS EN NAVEGADOR              ║");
+console.log("╚════════════════════════════════════════════════════════════╝\n");
+console.log(`🔗 Link clickeable (Ctrl+Click):`);
+console.log(`   ${fileUrl}\n`);
+
+let browserOpened = false;
 try {
   if (process.platform === "win32") {
     execSync(`cmd /c start "" "${HTML_OUT}"`, { stdio: "ignore" });
+    browserOpened = true;
   } else if (process.platform === "darwin") {
     execSync(`open "${HTML_OUT}"`, { stdio: "ignore" });
+    browserOpened = true;
   } else {
     execSync(`xdg-open "${HTML_OUT}"`, { stdio: "ignore" });
+    browserOpened = true;
   }
-  console.log(`✓ Reporte abierto en navegador\n`);
 } catch (e) {
-  console.log(`⚠️  Abre manualmente: ${HTML_OUT}\n`);
+  browserOpened = false;
+}
+
+if (browserOpened) {
+  console.log("✅ Reporte abierto automáticamente en tu navegador\n");
+} else {
+  console.log("⚠️  No se pudo abrir automáticamente.\n");
+  console.log("📋 Opciones manuales:");
+  console.log(`   1. Abre en tu navegador: ${fileUrl}`);
+  console.log(`   2. O copia esta ruta: ${HTML_OUT}\n`);
 }

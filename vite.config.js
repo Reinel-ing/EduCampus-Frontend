@@ -6,4 +6,31 @@ export default defineConfig({
   server: {
     allowedHosts: ["adopt-club-commodities-avatar.trycloudflare.com"],
   },
+  build: {
+    // Optimización de bundle
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor': ['react', 'react-dom', 'react-router-dom'],
+          'ui': ['tailwindcss-animate'],
+        }
+      }
+    },
+    // Minificación agresiva
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+      }
+    },
+    // Optimizar CSS
+    cssCodeSplit: true,
+    // Reportar tamaño del bundle
+    reportCompressedSize: true,
+    // Precargar módulos críticos
+    chunkSizeWarningLimit: 1000,
+  },
+  // Optimización de imágenes
+  assetsInclude: ['**/*.svg', '**/*.png', '**/*.jpg', '**/*.jpeg', '**/*.gif'],
 });
